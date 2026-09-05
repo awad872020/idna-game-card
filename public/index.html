@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>متجر البطاقات - Idna Gaming Card</title>
+  <style>
+    /* ===== جميع الأنماط من الإصدار السابق (تم حذفها للاختصار هنا، لكن ستكون موجودة في الملف الفعلي) ===== */
+    /* يرجى نسخ الأنماط الكاملة من الإجابة السابقة أو من المرفق */
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, system-ui, sans-serif; }
+    body { background: #0b0b0e; padding: 20px; min-height: 100vh; }
+    .store-header { text-align: center; padding: 34px 20px 28px; background: linear-gradient(145deg, #14141f, #1c1c2e); border: 1px solid #2a2a3a; border-radius: 32px; margin-bottom: 32px; box-shadow: 0 12px 40px rgba(0,0,0,0.7); }
+    .store-header h1 { font-size: 2.4rem; font-weight: 700; background: linear-gradient(135deg, #f5f5ff, #a0c0ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .store-header .subtitle { color: #9a9ab0; font-size: 1.1rem; margin-top: 6px; }
+    .store-header .badges { margin-top: 12px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+    .store-header .badges span { background: #1a1a2e; padding: 4px 16px; border-radius: 40px; color: #ffd700; border: 1px solid #ffd700; font-size: 0.8rem; font-weight: 600; }
+    .tabs { display: flex; justify-content: center; gap: 12px; margin-bottom: 32px; flex-wrap: wrap; }
+    .tab-btn { padding: 14px 30px; border: 2px solid #2a2a3a; border-radius: 60px; background: #16161f; color: #9a9aba; font-size: 1rem; font-weight: 600; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 8px; user-select: none; }
+    .tab-btn:hover { border-color: #4a7aff; color: #f0f0ff; }
+    .tab-btn.active { border-color: #ffd700; background: #1a1a2e; color: #ffd700; box-shadow: 0 0 30px rgba(255,215,0,0.1); }
+    .tab-btn .tab-icon { width: 133px; height: 133px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .tab-btn .tab-icon img { width: 100% !important; height: 100% !important; object-fit: contain; }
+    #backBtn { display: none; background: #1a1a2e; border: 2px solid #ffd700; color: #ffd700; padding: 12px 28px; border-radius: 40px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: 0.3s; margin-bottom: 20px; width: fit-content; }
+    #backBtn:hover { background: #ffd700; color: #0b0b0e; box-shadow: 0 0 30px rgba(255,215,0,0.3); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 18px; max-width: 1300px; margin: 0 auto; }
+    .card-item { background: #16161f; border: 1px solid #2a2a3a; border-radius: 22px; padding: 20px 14px 22px; transition: 0.25s ease; text-align: center; display: flex; flex-direction: column; box-shadow: 0 6px 18px rgba(0,0,0,0.6); }
+    .card-item:hover { transform: translateY(-6px); box-shadow: 0 14px 36px rgba(255,215,0,0.15); background: #1b1b2a; border-color: #ffd700; }
+    .card-item .icon { margin-bottom: 8px; }
+    .card-item .icon img { width: 32px; height: 32px; object-fit: contain; }
+    .card-item .usd, .card-item .shekel, .card-item .diamonds, .card-item .tokens, .card-item .uc, .card-item .coins,
+    .card-item .ps-amount, .card-item .ps-region, .card-item .razer-amount, .card-item .nintendo-type, .card-item .nintendo-amount,
+    .card-item .xbox-amount, .card-item .xboxuae-amount, .card-item .steam-amount, .card-item .steam-region,
+    .card-item .saudisteam-amount, .card-item .saudisteam-region, .card-item .roblox-amount, .card-item .roblox-region,
+    .card-item .yaahlan-amount, .card-item .layla-coins, .card-item .tiktok-coins, .card-item .googleplay-amount,
+    .card-item .mlbb-diamonds, .card-item .netflix-amount, .card-item .arenabreakout-amount, .card-item .yallaludo-amount,
+    .card-item .eightball-amount, .card-item .clashofclans-amount, .card-item .snapchat-amount, .card-item .discord-amount,
+    .card-item .fcmobile-amount, .card-item .minecraft-amount { color: #ffd700 !important; }
+    .card-item .shekel { opacity: 0.85; }
+    .card-item .desc { color: #b0b0dd !important; opacity: 0.8; font-size: 0.85rem; margin-top: 2px; }
+    .order-btn { margin-top: 12px; padding: 10px 20px; background: #25d366; color: #ffd700; border: 2px solid #ffd700; border-radius: 40px; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .order-btn:hover { background: #1ebe5c; transform: scale(1.05); box-shadow: 0 0 30px rgba(255,215,0,0.3); border-color: #ffe44d; }
+    .order-btn svg { width: 20px; height: 20px; fill: #ffd700; }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 999; justify-content: center; align-items: center; }
+    .modal-overlay.active { display: flex; }
+    .modal-box { background: #1c1c2e; border: 1px solid #ffd700; border-radius: 28px; padding: 40px 32px; max-width: 420px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(255,215,0,0.1); animation: modalFade 0.3s ease; }
+    @keyframes modalFade { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .modal-box h2 { color: #f0f0ff; font-size: 1.5rem; margin-bottom: 8px; }
+    .modal-box .modal-sub { color: #9a9aba; font-size: 0.9rem; margin-bottom: 20px; }
+    .modal-box .product-preview { background: #14141f; border-radius: 16px; padding: 12px; margin-bottom: 20px; border: 1px solid #ffd700; }
+    .modal-box .product-preview .preview-label { color: #7a7a9a; font-size: 0.8rem; }
+    .modal-box .product-preview .preview-detail { color: #ffd700; font-weight: 700; font-size: 1.1rem; }
+    .modal-box label { display: block; text-align: right; color: #b0b0dd; font-size: 0.9rem; font-weight: 600; margin: 16px 0 6px; }
+    .modal-box input { width: 100%; padding: 14px 16px; background: #0b0b0e; border: 2px solid #2a2a3a; border-radius: 14px; color: #f0f0ff; font-size: 1rem; transition: 0.3s; outline: none; direction: ltr; }
+    .modal-box input:focus { border-color: #ffd700; box-shadow: 0 0 20px rgba(255,215,0,0.15); }
+    .modal-box input::placeholder { color: #5a5a7a; }
+    .modal-actions { display: flex; gap: 12px; margin-top: 24px; }
+    .modal-actions button { flex: 1; padding: 14px 20px; border: none; border-radius: 40px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: 0.3s; }
+    .modal-actions .btn-cancel { background: #2a2a3a; color: #9a9aba; }
+    .modal-actions .btn-cancel:hover { background: #3a3a4a; }
+    .modal-actions .btn-send { background: #25d366; color: #ffd700; border: 2px solid #ffd700; }
+    .modal-actions .btn-send:hover { background: #1ebe5c; transform: scale(1.02); box-shadow: 0 0 30px rgba(255,215,0,0.3); }
+    .footer-note { text-align: center; margin-top: 44px; border-top: 1px solid #22223a; padding-top: 28px; max-width: 700px; margin-left: auto; margin-right: auto; }
+    .footer-note span { background: #1a1a2e; padding: 8px 20px; border-radius: 40px; color: #ffd700; border: 1px solid #ffd700; font-weight: 700; font-size: 1.1rem; margin: 0 6px; display: inline-block; transition: 0.2s; cursor: default; text-shadow: 0 0 20px rgba(255,215,0,0.15); }
+    .footer-note span:hover { background: #ffd700; color: #0b0b0e; box-shadow: 0 0 30px rgba(255,215,0,0.3); }
+    .footer-note .bank-account { display: block; margin-top: 10px; color: #7a7a9a; font-size: 0.9rem; background: transparent !important; border: none !important; padding: 0 !important; text-shadow: none !important; cursor: default !important; }
+    .footer-note .bank-account strong { color: #ffd700; }
+    .whatsapp-contact { text-align: center; margin-top: 24px; padding: 16px 24px; background: linear-gradient(145deg, #1a1a2e, #14141f); border: 2px solid #ffd700; border-radius: 60px; max-width: 550px; margin-left: auto; margin-right: auto; transition: 0.3s; box-shadow: 0 0 30px rgba(255,215,0,0.05); display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+    .whatsapp-contact:hover { border-color: #ffe44d; box-shadow: 0 0 50px rgba(255,215,0,0.15); transform: scale(1.02); }
+    .whatsapp-contact { color: #ffd700; font-size: 1.1rem; font-weight: 500; }
+    .whatsapp-icon { width: 28px; height: 28px; color: #ffd700; flex-shrink: 0; transition: 0.3s; }
+    .whatsapp-contact a { color: #ffd700; font-weight: 700; font-size: 1.2rem; text-decoration: none; transition: 0.2s; direction: ltr; display: inline-block; }
+    .whatsapp-contact a:hover { color: #ffe44d; text-shadow: 0 0 20px rgba(255,215,0,0.3); }
+    .copyright { text-align: center; margin-top: 20px; color: #5a5a7a; font-size: 0.8rem; }
+    .stats { text-align: center; margin-top: 20px; color: #7a7a9a; font-size: 0.9rem; }
+    .stats strong { color: #ffd700; }
+    ::-webkit-scrollbar { width: 6px; background: #0b0b0e; }
+    ::-webkit-scrollbar-thumb { background: #2a2a4a; border-radius: 20px; }
+    @media (max-width: 520px) { .store-header h1 { font-size: 1.7rem; } .card-grid { grid-template-columns: repeat(2,1fr); gap: 12px; } .card-item { padding: 14px 10px; } .order-btn { font-size: 0.75rem; padding: 8px 12px; } .tab-btn { padding: 10px 16px; font-size: 0.85rem; } .tab-btn .tab-icon { width: 80px; height: 80px; } .modal-box { padding: 28px 20px; } .modal-box h2 { font-size: 1.2rem; } }
+  </style>
+</head>
+<body>
+
+<div class="store-header">
+  <h1>🎮 Idna Gaming Card</h1>
+  <p class="subtitle">24/7 · شحن فوري · دعم · أقل الأسعار في فلسطين</p>
+  <div class="badges">
+    <span>🕐 24/7</span>
+    <span>⚡ شحن فوري</span>
+    <span>🏆 أقل الأسعار</span>
+  </div>
+</div>
+
+<div class="tabs" id="tabContainer"></div>
+<button id="backBtn" onclick="goBack()">⬅ الرجوع إلى الأقسام الأساسية</button>
+<div id="contentContainer"></div>
+
+<!-- مودال الطلب -->
+<div class="modal-overlay" id="orderModal">
+  <div class="modal-box">
+    <h2>📋 تأكيد الطلب</h2>
+    <p class="modal-sub">أدخل ID أو Email الخاص بك لإتمام الطلب</p>
+    <div class="product-preview">
+      <div class="preview-label">المنتج المطلوب</div>
+      <div class="preview-detail" id="modalProductDetail">-</div>
+    </div>
+    <label for="userId">🆔 ID / Email</label>
+    <input type="text" id="userId" placeholder="مثال: player123@gmail.com" dir="ltr" />
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">إلغاء</button>
+      <button class="btn-send" onclick="confirmOrder()">✅ إرسال الطلب</button>
+    </div>
+  </div>
+</div>
+
+<div class="footer-note">
+  <span>💳 كاش</span>
+  <span>🏦 بنك فلسطين</span>
+  <span>🔄 رفلكت</span>
+  <span>📱 جوال بي</span>
+  <span class="bank-account">🏦 بنك فلسطين حساب رقم: <strong>776849</strong></span>
+  <span class="bank-account">📱 رفلكت كاش: <strong>0599080885</strong></span>
+  <span class="bank-account">📱 جوال بي: <strong>0599080885</strong></span>
+</div>
+
+<div class="whatsapp-contact">
+  <svg class="whatsapp-icon" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+  </svg>
+  للطلب: تواصل معنا عبر واتساب
+  <a href="https://wa.me/970569080887" target="_blank">00970569080887</a>
+</div>
+
+<div class="stats">
+  📦 عدد الطلبات اليوم: <strong id="orderCount">0</strong>
+</div>
+
+<div class="copyright">
+  © 2026 Idna Gaming Card
+</div>
+
+<script>
+  // =============================================
+  // ===== DATA (نفس البيانات السابقة) =====
+  // =============================================
+
+  const tabsConfig = [
+    { id: 'itunes', label: '🍎 iTunes', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-84,h-23,c-at_least/storage/card-categories/a634bf28ac1c2af14d24ef545123f77b-1695199694.webp" alt="iTunes" style="width:133px;height:133px;object-fit:contain;" />' },
+    { id: 'freefire', label: '🔥 فري فاير', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-159,h-23,c-at_least/storage/card-categories/470118d7c59eff087dae0d80449a3c17-1730885495.webp" alt="FreeFire" style="width:133px;height:133px;object-fit:contain;" />' },
+    { id: 'jawaker', label: '💎 جواكر', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-116,h-20,c-at_least/storage/card-categories/d9255800c517875822e36d7b527f437a-1730884583.webp" alt="Jawaker" style="width:133px;height:133px;object-fit:contain;" />' },
+    { id: 'pubg', label: '🔫 PUBG', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-145,h-23,c-at_least/storage/card-categories/30628a19dbb82d596187e8f689aa3e02-1788438486.webp" alt="PUBG" style="width:133px;height:133px;object-fit:contain;" />' },
+    { id: 'hiya', label: '💬 هاياشات', icon: '<img src="https://cdn.salla.sa/ynzrO/ILOIuS3KP4IMTpVLuovlX9XWP3a9TnZv1SeUVQ1x.png" alt="Hiya Chat" style="width:133px;height:133px;object-fit:contain;" />' },
+    { id: 'bigo', label: '📺 BIGO', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-170,h-46,c-at_least/storage/card-categories/fc7a1e0d6b1fba9c983c53188bfaedcf-1731415367.webp" alt="Bigo" style="width:133px;height:133px;object-fit:contain;" />' },
+    { id: 'vn', label: '🔫 PUBG VN', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-150,h-23,c-at_least/storage/card-categories/557c448281d09cf595c549c120affa9a-1695199790.webp" alt="PUBG VN" style="width:133px;height:133px;object-fit:contain;" />' },
+    { id: 'tango', label: '💃 TANGO', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-95,h-23,c-at_least/storage/card-categories/06823ad9fe4c1a4588a5a97f51528a7b-1715778871.webp" alt="Tango" style="width:133px;height:133px;object-fit:contain;" />' },
+    { id: 'playstation', label: '🎮 PlayStation', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-153,h-23,c-at_least/storage/card-categories/f12acd154ac477481e3b541e60e165d1-1713787750.webp" alt="PlayStation" style="width:133px;height:133px;object-fit:contain;" />' },
+    { id: 'razer', label: '🐍 Razer', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-92,h-23,c-at_least/storage/card-categories/6f118cceb709279eb6989eb39bd1ac40-1695200444.webp" alt="Razer" style="width:133px;height:133px;object-fit:contain;" />' },
+    { id: 'nintendo', label: '🎮 Nintendo', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-103,h-23,c-at_least/storage/card-categories/65bc65ca141ce4becd1dc5edec875875-1695202173.webp" alt="Nintendo" style="width:133px;height:133px;object-fit:contain;" />' },
+    { id: 'xbox', label: '🎮 Xbox', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-136,h-23,c-at_least/storage/card-categories/30fefb9553dd594ffbe253fd85490de8-1695200337.webp" alt="Xbox" style="width:133px;height:133px;object-fit:contain;" />' },
+    { id: 'xboxuae', label: '🎮 Xbox UAE', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-136,h-23,c-at_least/storage/card-categories/30fefb9553dd594ffbe253fd85490de8-1695200337.webp" alt="Xbox UAE" style="width:133px;height:133px;object-fit:contain;" />' },
+    { id: 'steam', label: '🎮 Steam', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-120,h-23,c-at_least/storage/card-categories/5d6b4e4b3dc5bbec7fa8ed346d2a725a-1695199384.webp" alt="Steam" style="width:133px;height:133px;object-fit:contain;" />' },
+    { id: 'saudisteam', label: '🇸🇦 Steam KSA', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-120,h-23,c-at_least/storage/card-categories/5d6b4e4b3dc5bbec7fa8ed346d2a725a-1695199384.webp" alt="Steam KSA" style="width:133px;height:133px;object-fit:contain;" />' },
+    { id: 'roblox', label: '🤖 Roblox', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-117,h-23,c-at_least/storage/card-categories/27f6dc58ed88faecbc10e551230110c7-1695199878.webp" alt="Roblox" style="width:133px;height:133px;object-fit:contain;" />' },
+    { id: 'yaahlan', label: '🪙 Yaahlan', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-86,h-23,c-at_least/storage/flags/1c457e41d350751b74216be1fe1fd60a-1781549067.webp" alt="Yaahlan" style="width:133px;height:133px;object-fit:contain;" />' },
+    { id: 'layla', label: '💬 LAYLA', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-74,h-23,c-at_least/storage/flags/bebcfa19a87f8accd47bab3bf83ed815-1741129398.webp" alt="Layla" style="width:133px;height:133px;object-fit:contain;" />' },
+    { id: 'tiktok', label: '🎵 TikTok', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-103,h-23,c-at_least/storage/flags/49881ca8ab2b6d821a7e8f9a01990c0c-1775403941.webp" alt="TikTok" style="width:133px;height:133px;object-fit:contain;" />' },
+    { id: 'googleplay', label: '▶️ Google Play', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-117,h-23,c-at_least/storage/card-categories/318f01dfbc60ebcc251ee3fc9fd720ca-1695199765.webp" alt="Google Play" style="width:133px;height:133px;object-fit:contain;" />' },
+    { id: 'mlbb', label: '⚔️ Mobile Legends', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-170,h-46,c-at_least/storage/card-categories/3c20d9bd2115f11280ab981c78923c20-1682240806.webp" alt="Mobile Legends" style="width:133px;height:133px;object-fit:contain;" />' },
+    { id: 'netflix', label: '🎬 Netflix', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-120,h-23,c-at_least/storage/card-categories/e791cb915481b57d3759aeb0b7bc8cfb-1695200180.webp" alt="Netflix" style="width:133px;height:133px;object-fit:contain;" />' },
+    { id: 'arenabreakout', label: '🔫 Arena Breakout', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-117,h-23,c-at_least/storage/card-categories/50fe8c48d496cc998350bef7e0e70e57-1715417932.webp" alt="Arena Breakout" style="width:133px;height:133px;object-fit:contain;" />' },
+    { id: 'yallaludo', label: '💎 Yalla Ludo', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-162,h-23,c-at_least/storage/card-categories/20c3726485a8f4c6f9b0dc90a36a7ef8-1709026766.webp" alt="Yalla Ludo" style="width:133px;height:133px;object-fit:contain;" />' },
+    { id: 'eightball', label: '🎱 8 Ball Pool', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-94,h-23,c-at_least/storage/flags/5840a4477ac496573a2ad92bd226d1c7-1682585116.webp" alt="8Ball Pool" style="width:133px;height:133px;object-fit:contain;" />' },
+    { id: 'clashofclans', label: '🏰 Clash of Clans', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-170,h-46,c-at_least/storage/card-categories/a6446faec16e449b0aad65e069ba9dec-1684845028.webp" alt="Clash of Clans" style="width:133px;height:133px;object-fit:contain;" />' },
+    { id: 'snapchat', label: '👻 Snapchat', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-69,h-23,c-at_least/storage/flags/1999bd68a937012535b617efe783a0f9-1741129043.webp" alt="Snapchat" style="width:133px;height:133px;object-fit:contain;" />' },
+    { id: 'discord', label: '🎮 Discord', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-170,h-46,c-at_least/storage/card-categories/5661c4cb5073329b9b3e9678392f9e92-1716020426.webp" alt="Discord" style="width:133px;height:133px;object-fit:contain;" />' },
+    { id: 'fcmobile', label: '⚽ FC Mobile', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-170,h-46,c-at_least/storage/flags/633f1af794dde985f9ffbec1b38a2251-1731322565.webp" alt="FC Mobile" style="width:133px;height:133px;object-fit:contain;" />' },
+    { id: 'minecraft', label: '⛏️ Minecraft', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-98,h-23,c-at_least/storage/card-categories/4e6307ca0931b629b5985a65343cd04d-1695203235.webp" alt="Minecraft" style="width:133px;height:133px;object-fit:contain;" />' }
+  ];
+
+  const products = {
+    itunes: [
+      { shekel: "شيكل 18", usd: "دولار 5", label: "App Store & iTunes" },
+      { shekel: "شيكل 32", usd: "دولار 10", label: "Apps, games, music, movies, TV, books" },
+      { shekel: "شيكل 50", usd: "دولار 15", label: "Apps, games, music, movies, TV, books" },
+      { shekel: "شيكل 66", usd: "دولار 20", label: "Apps, games, music, movies, TV, books" },
+      { shekel: "شيكل 85", usd: "دولار 25", label: "Apps, games, music, movies, TV, books" },
+      { shekel: "شيكل 105", usd: "دولار 30", label: "Apps, games, music, movies, TV, books" },
+      { shekel: "شيكل 132", usd: "دولار 40", label: "iTunes" },
+      { shekel: "شيكل 165", usd: "دولار 50", label: "iTunes" },
+      { shekel: "شيكل 200", usd: "دولار 60", label: "iTunes" },
+      { shekel: "شيكل 224", usd: "دولار 70", label: "iTunes" },
+      { shekel: "شيكل 318", usd: "دولار 100", label: "iTunes" },
+      { shekel: "شيكل 482", usd: "دولار 150", label: "iTunes" },
+      { shekel: "شيكل 635", usd: "دولار 200", label: "iTunes" },
+      { shekel: "شيكل 952", usd: "دولار 300", label: "iTunes" },
+      { shekel: "شيكل 1587", usd: "دولار 500", label: "iTunes" }
+    ],
+    freefire: [
+      { diamonds: "💎 100+10", shekel: "شيكل 5", label: "جواهر + هدية" },
+      { diamonds: "💎 210+21", shekel: "شيكل 9", label: "جواهر + هدية" },
+      { diamonds: "💎 530+53", shekel: "شيكل 18", label: "جواهر + هدية" },
+      { diamonds: "💎 1080+108", shekel: "شيكل 35", label: "جواهر + هدية" },
+      { diamonds: "💎 2200+220", shekel: "شيكل 68", label: "جواهر + هدية" }
+    ],
+    jawaker: [
+      { tokens: "Token 10,000", shekel: "شيكل 5", label: "" },
+      { tokens: "Token 15,000", shekel: "شيكل 8", label: "" },
+      { tokens: "Token 35,000", shekel: "شيكل 18", label: "" },
+      { tokens: "Token 70,000", shekel: "شيكل 32", label: "" },
+      { tokens: "Token 95,000", shekel: "شيكل 45", label: "" },
+      { tokens: "Token 150,000", shekel: "شيكل 62", label: "" },
+      { tokens: "Token 230,000", shekel: "شيكل 94", label: "" },
+      { tokens: "Token 400,000", shekel: "شيكل 155", label: "" },
+      { tokens: "⭐ 52,500", shekel: "شيكل 202", label: "باقة مميزة" },
+      { tokens: "⭐ 805,000", shekel: "شيكل 310", label: "باقة مميزة" },
+      { tokens: "⭐ 1,000,000", shekel: "شيكل 380", label: "باقة مميزة" }
+    ],
+    pubg: [
+      { uc: "60 UC", shekel: "شيكل 4", label: "" },
+      { uc: "120 UC", shekel: "شيكل 7", label: "" },
+      { uc: "240 UC", shekel: "شيكل 14", label: "" },
+      { uc: "300 + 25 UC", shekel: "شيكل 17", label: "" },
+      { uc: "660 UC", shekel: "شيكل 32", label: "" },
+      { uc: "720 UC", shekel: "شيكل 36", label: "" },
+      { uc: "1800 UC", shekel: "شيكل 77", label: "" },
+      { uc: "2175 UC", shekel: "شيكل 95", label: "" },
+      { uc: "3000 + 850 UC", shekel: "شيكل 150", label: "باقة مميزة" },
+      { uc: "4105 UC", shekel: "شيكل 170", label: "باقة مميزة" },
+      { uc: "8100 UC", shekel: "شيكل 305", label: "باقة مميزة" },
+      { uc: "9900 UC", shekel: "شيكل 380", label: "باقة مميزة" },
+      { uc: "13750 UC", shekel: "شيكل 525", label: "باقة مميزة" },
+      { uc: "16200 UC", shekel: "شيكل 602", label: "باقة مميزة" },
+      { uc: "24300 UC", shekel: "شيكل 890", label: "باقة مميزة" },
+      { uc: "32400 UC", shekel: "شيكل 1195", label: "باقة مميزة" },
+      { uc: "40500 UC", shekel: "شيكل 1500", label: "باقة مميزة" }
+    ],
+    hiya: [
+      { coins: "1,800", shekel: "شيكل 10", label: "عملات هاياشات" },
+      { coins: "4,100", shekel: "شيكل 20", label: "عملات هاياشات" },
+      { coins: "6,100", shekel: "شيكل 30", label: "عملات هاياشات" },
+      { coins: "9,000", shekel: "شيكل 40", label: "عملات هاياشات" },
+      { coins: "11,500", shekel: "شيكل 50", label: "عملات هاياشات" },
+      { coins: "24,000", shekel: "شيكل 100", label: "عملات هاياشات" }
+    ],
+    bigo: [
+      { diamonds: "💎 120", shekel: "شيكل 9", label: "" },
+      { diamonds: "💎 200", shekel: "شيكل 17", label: "" },
+      { diamonds: "💎 400", shekel: "شيكل 30", label: "" },
+      { diamonds: "💎 600", shekel: "شيكل 45", label: "" },
+      { diamonds: "💎 800", shekel: "شيكل 58", label: "" },
+      { diamonds: "💎 1,000", shekel: "شيكل 70", label: "" },
+      { diamonds: "💎 2,000", shekel: "شيكل 140", label: "" },
+      { diamonds: "💎 3,000", shekel: "شيكل 205", label: "" },
+      { diamonds: "💎 4,000", shekel: "شيكل 272", label: "" },
+      { diamonds: "💎 8,000", shekel: "شيكل 540", label: "" },
+      { diamonds: "💎 10,000", shekel: "شيكل 670", label: "" },
+      { diamonds: "💎 12,000", shekel: "شيكل 800", label: "" },
+      { diamonds: "💎 20,000", shekel: "شيكل 1320", label: "" }
+    ],
+    vn: [
+      { coins: "UC 60+", shekel: "شيكل 5", label: "بيجی فیتنامی" },
+      { coins: "UC 140+", shekel: "شيكل 11", label: "بيجی فیتنامی" },
+      { coins: "UC 300+", shekel: "شيكل 20", label: "بيجی فیتنامی" },
+      { coins: "UC 600+", shekel: "شيكل 33", label: "بيجی فیتنامی" },
+      { coins: "UC 1,500+", shekel: "شيكل 80", label: "بيجی فیتنامی" },
+      { coins: "UC 3,000+", shekel: "شيكل 158", label: "بيجی فیتنامی" }
+    ],
+    tango: [
+      { coins: "COIN 250", shekel: "شيكل 10", label: "عملات تانجو" },
+      { coins: "COIN 600", shekel: "شيكل 20", label: "عملات تانجو" },
+      { coins: "COIN 1,000", shekel: "شيكل 25", label: "عملات تانجو" },
+      { coins: "COIN 1,200", shekel: "شيكل 30", label: "عملات تانجو" },
+      { coins: "COIN 2,600", shekel: "شيكل 60", label: "عملات تانجو" },
+      { coins: "COIN 3,750", shekel: "شيكل 80", label: "عملات تانجو" },
+      { coins: "COIN 7,500", shekel: "شيكل 158", label: "عملات تانجو" },
+      { coins: "COIN 15,000", shekel: "شيكل 320", label: "عملات تانجو" },
+      { coins: "COIN 30,000", shekel: "شيكل 630", label: "عملات تانجو" },
+      { coins: "COIN 37,500", shekel: "شيكل 760", label: "عملات تانجو" }
+    ],
+    playstation: [
+      { region: "🇺🇸 أمريكي", amount: "$10", shekel: "شيكل 35", label: "PlayStation Store" },
+      { region: "🇺🇸 أمريكي", amount: "$25", shekel: "شيكل 82", label: "PlayStation Store" },
+      { region: "🇺🇸 أمريكي", amount: "$50", shekel: "شيكل 162", label: "PlayStation Store" },
+      { region: "🇺🇸 أمريكي", amount: "$75", shekel: "شيكل 250", label: "PlayStation Store" },
+      { region: "🇺🇸 أمريكي", amount: "$100", shekel: "شيكل 320", label: "PlayStation Store" },
+      { region: "🇸🇦 سعودي", amount: "$10", shekel: "شيكل 36", label: "بطاقة سعودية" },
+      { region: "🇸🇦 سعودي", amount: "$20", shekel: "شيكل 71", label: "بطاقة سعودية" },
+      { region: "🇸🇦 سعودي", amount: "$50", shekel: "شيكل 176", label: "بطاقة سعودية" },
+      { region: "🇸🇦 سعودي", amount: "$70", shekel: "شيكل 242", label: "بطاقة سعودية" },
+      { region: "🇸🇦 سعودي", amount: "$100", shekel: "شيكل 340", label: "بطاقة سعودية" },
+      { region: "🇦🇪 إماراتي", amount: "$10", shekel: "شيكل 38", label: "بطاقة اماراتية" },
+      { region: "🇦🇪 إماراتي", amount: "$20", shekel: "شيكل 70", label: "بطاقة اماراتية" },
+      { region: "🇦🇪 إماراتي", amount: "$50", shekel: "شيكل 165", label: "بطاقة اماراتية" },
+      { region: "🇦🇪 إماراتي", amount: "$100", shekel: "شيكل 320", label: "بطاقة اماراتية" }
+    ],
+    razer: [
+      { amount: "$5", shekel: "شيكل 18", label: "Razer Gold Global" },
+      { amount: "$10", shekel: "شيكل 34", label: "Razer Gold Global" },
+      { amount: "$20", shekel: "شيكل 68", label: "Razer Gold Global" },
+      { amount: "$50", shekel: "شيكل 168", label: "Razer Gold Global" },
+      { amount: "$100", shekel: "شيكل 330", label: "Razer Gold Global" },
+      { amount: "$200", shekel: "شيكل 655", label: "Razer Gold Global" }
+    ],
+    nintendo: [
+      { type: "🎮 eShop", amount: "$10", shekel: "شيكل 32", label: "Nintendo US" },
+      { type: "🎮 eShop", amount: "$20", shekel: "شيكل 64", label: "Nintendo US" },
+      { type: "🎮 eShop", amount: "$35", shekel: "شيكل 113", label: "Nintendo US" },
+      { type: "🎮 eShop", amount: "$50", shekel: "شيكل 160", label: "Nintendo US" },
+      { type: "⭐ Membership", amount: "3 Month", shekel: "شيكل 32", label: "Nintendo Membership" },
+      { type: "⭐ Membership", amount: "12 Month", shekel: "شيكل 74", label: "Nintendo Membership" }
+    ],
+    xbox: [
+      { amount: "$5", shekel: "شيكل 20", label: "Xbox Gift Card USA" },
+      { amount: "$10", shekel: "شيكل 34", label: "Xbox Gift Card USA" },
+      { amount: "$15", shekel: "شيكل 52", label: "Xbox Gift Card USA" },
+      { amount: "$20", shekel: "شيكل 68", label: "Xbox Gift Card USA" },
+      { amount: "$25", shekel: "شيكل 85", label: "Xbox Gift Card USA" },
+      { amount: "$50", shekel: "شيكل 165", label: "Xbox Gift Card USA" },
+      { amount: "$100", shekel: "شيكل 320", label: "Xbox Gift Card USA" },
+      { amount: "🎮 Game Pass", shekel: "شيكل 70", label: "Xbox Game Pass Ultimate US – 1" },
+      { amount: "🎮 Game Pass", shekel: "شيكل 200", label: "Xbox Game Pass Ultimate US – 3" }
+    ],
+    xboxuae: [
+      { amount: "AED 59", shekel: "60", label: "Xbox Gift Card UAE" },
+      { amount: "AED 99", shekel: "100", label: "Xbox Gift Card UAE" },
+      { amount: "AED 199", shekel: "200", label: "Xbox Gift Card UAE" }
+    ],
+    steam: [
+      { region: "🇺🇸 أمريكي", amount: "$5", shekel: "شيكل 18", label: "Steam Gift Card" },
+      { region: "🇺🇸 أمريكي", amount: "$10", shekel: "شيكل 45", label: "Steam Gift Card" },
+      { region: "🇺🇸 أمريكي", amount: "$20", shekel: "شيكل 80", label: "Steam Gift Card" },
+      { region: "🇺🇸 أمريكي", amount: "$50", shekel: "شيكل 180", label: "Steam Gift Card" },
+      { region: "🇺🇸 أمريكي", amount: "$100", shekel: "شيكل 350", label: "Steam Gift Card" },
+      { region: "🇦🇪 إماراتي", amount: "AED 20", shekel: "شيكل 25", label: "Steam Wallet Card UAE" },
+      { region: "🇦🇪 إماراتي", amount: "AED 50", shekel: "شيكل 55", label: "Steam Wallet Card UAE" },
+      { region: "🇦🇪 إماراتي", amount: "AED 100", shekel: "شيكل 105", label: "Steam Wallet Card UAE" },
+      { region: "🇦🇪 إماراتي", amount: "AED 200", shekel: "شيكل 205", label: "Steam Wallet Card UAE" },
+      { region: "🇦🇪 إماراتي", amount: "AED 400", shekel: "شيكل 400", label: "Steam Wallet Card UAE" }
+    ],
+    saudisteam: [
+      { region: "🇸🇦 سعودي", amount: "SAR 20", shekel: "شيكل 22", label: "Steam Saudi" },
+      { region: "🇸🇦 سعودي", amount: "SAR 50", shekel: "شيكل 51", label: "Steam Saudi" },
+      { region: "🇸🇦 سعودي", amount: "SAR 100", shekel: "شيكل 100", label: "Steam Saudi" },
+      { region: "🇸🇦 سعودي", amount: "SAR 200", shekel: "شيكل 200", label: "Steam Saudi" },
+      { region: "🇸🇦 سعودي", amount: "SAR 400", shekel: "شيكل 400", label: "Steam Saudi" }
+    ],
+    roblox: [
+      { region: "🇺🇸 أمريكي", amount: "$5", shekel: "شيكل 20", label: "Roblox Gift Card" },
+      { region: "🇺🇸 أمريكي", amount: "$10", shekel: "شيكل 33", label: "Roblox Gift Card" },
+      { region: "🇺🇸 أمريكي", amount: "$25", shekel: "شيكل 82", label: "Roblox Gift Card" },
+      { region: "🇺🇸 أمريكي", amount: "$50", shekel: "شيكل 155", label: "Roblox Gift Card" },
+      { region: "🇺🇸 أمريكي", amount: "$100", shekel: "شيكل 315", label: "Roblox Gift Card" },
+      { region: "KSA", amount: "SAR 20", shekel: "شيكل 21", label: "Roblox KSA" },
+      { region: "KSA", amount: "SAR 50", shekel: "شيكل 46", label: "Roblox KSA" },
+      { region: "KSA", amount: "SAR 100", shekel: "شيكل 83", label: "Roblox KSA" },
+      { region: "KSA", amount: "SAR 200", shekel: "شيكل 162", label: "Roblox KSA" },
+      { region: "KSA", amount: "SAR 500", shekel: "شيكل 407", label: "Roblox KSA" },
+      { region: "AED", amount: "AED 20", shekel: "شيكل 21", label: "Roblox UAE" },
+      { region: "AED", amount: "AED 50", shekel: "شيكل 46", label: "Roblox UAE" },
+      { region: "AED", amount: "AED 100", shekel: "شيكل 85", label: "Roblox UAE" },
+      { region: "AED", amount: "AED 200", shekel: "شيكل 164", label: "Roblox UAE" },
+      { region: "AED", amount: "AED 500", shekel: "شيكل 407", label: "Roblox UAE" }
+    ],
+    yaahlan: [
+      { amount: "1,000", shekel: "شيكل 9", label: "Yaahlan" },
+      { amount: "2,000", shekel: "شيكل 16", label: "Yaahlan" },
+      { amount: "5,000", shekel: "شيكل 37", label: "Yaahlan" }
+    ],
+    layla: [
+      { coins: "Coin 10,000", shekel: "شيكل 15", label: "Layla Chat" },
+      { coins: "Coin 15,000", shekel: "شيكل 20", label: "Layla Chat" },
+      { coins: "Coin 20,000", shekel: "شيكل 30", label: "Layla Chat" },
+      { coins: "Coin 30,000", shekel: "شيكل 40", label: "Layla Chat" },
+      { coins: "Coin 50,000", shekel: "شيكل 65", label: "Layla Chat" },
+      { coins: "Coin 80,000", shekel: "شيكل 100", label: "Layla Chat" },
+      { coins: "Coin 100,000", shekel: "شيكل 115", label: "Layla Chat" }
+    ],
+    tiktok: [
+      { coins: "🎵 500 Coins", shekel: "شيكل 23", label: "TikTok Coins" },
+      { coins: "🎵 700 Coins", shekel: "شيكل 30", label: "TikTok Coins" },
+      { coins: "🎵 1,000 Coins", shekel: "شيكل 47", label: "TikTok Coins" },
+      { coins: "🎵 1,400 Coins", shekel: "شيكل 59", label: "TikTok Coins" },
+      { coins: "🎵 2,100 Coins", shekel: "شيكل 89", label: "TikTok Coins" },
+      { coins: "🎵 3,500 Coins", shekel: "شيكل 145", label: "TikTok Coins" },
+      { coins: "🎵 5,000 Coins", shekel: "شيكل 220", label: "TikTok Coins" },
+      { coins: "🎵 7,000 Coins", shekel: "شيكل 300", label: "TikTok Coins" },
+      { coins: "🎵 10,000 Coins", shekel: "شيكل 390", label: "TikTok Coins" },
+      { coins: "🎵 17,500 Coins", shekel: "شيكل 660", label: "TikTok Coins" },
+      { coins: "🎵 35,000 Coins", shekel: "شيكل 1300", label: "TikTok Coins" }
+    ],
+    googleplay: [
+      { amount: "$5", shekel: "شيكل 18", label: "Google Play US" },
+      { amount: "$10", shekel: "شيكل 35", label: "Google Play US" },
+      { amount: "$15", shekel: "شيكل 51", label: "Google Play US" },
+      { amount: "$25", shekel: "شيكل 85", label: "Google Play US" },
+      { amount: "$50", shekel: "شيكل 165", label: "Google Play US" },
+      { amount: "$100", shekel: "شيكل 335", label: "Google Play US" }
+    ],
+    mlbb: [
+      { diamonds: "💎 625+81", shekel: "شيكل 8", label: "Diamonds + Bonus" },
+      { diamonds: "💎 1,860+335", shekel: "شيكل 32", label: "Diamonds + Bonus" },
+      { diamonds: "💎 3,099+589", shekel: "شيكل 40", label: "Diamonds + Bonus" },
+      { diamonds: "💎 7,740+1,548", shekel: "شيكل 115", label: "Diamonds + Bonus" },
+      { diamonds: "💎 4,545", shekel: "شيكل 190", label: "Diamonds" },
+      { diamonds: "💎 1,890", shekel: "شيكل 280", label: "Diamonds" }
+    ],
+    netflix: [
+      { amount: "$20", shekel: "شيكل 70", label: "Netflix US" },
+      { amount: "$25", shekel: "شيكل 88", label: "Netflix US" },
+      { amount: "$30", shekel: "شيكل 105", label: "Netflix US" },
+      { amount: "$40", shekel: "شيكل 138", label: "Netflix US" },
+      { amount: "$50", shekel: "شيكل 175", label: "Netflix US" },
+      { amount: "$60", shekel: "شيكل 210", label: "Netflix US" },
+      { amount: "$100", shekel: "شيكل 345", label: "Netflix US" }
+    ],
+    arenabreakout: [
+      { amount: "60", shekel: "شيكل 5", label: "Arena Breakout" },
+      { amount: "310", shekel: "شيكل 17", label: "Arena Breakout" },
+      { amount: "630", shekel: "شيكل 31", label: "Arena Breakout" },
+      { amount: "1,580", shekel: "شيكل 80", label: "Arena Breakout" },
+      { amount: "3,200", shekel: "شيكل 152", label: "Arena Breakout" },
+      { amount: "6,500", shekel: "شيكل 295", label: "Arena Breakout" }
+    ],
+    yallaludo: [
+      { amount: "2,320 💎", shekel: "شيكل 18", label: "Yalla Ludo" },
+      { amount: "5,150 💎", shekel: "شيكل 37", label: "Yalla Ludo" },
+      { amount: "13,580 💎", shekel: "شيكل 81", label: "Yalla Ludo" },
+      { amount: "55,800 💎", shekel: "شيكل 310", label: "Yalla Ludo" }
+    ],
+    eightball: [
+      { amount: "112K 🎱", shekel: "شيكل 10", label: "Ball Coins" },
+      { amount: "256K 🎱", shekel: "شيكل 16", label: "Ball Coins" },
+      { amount: "800K 🎱", shekel: "شيكل 38", label: "Ball Coins" },
+      { amount: "2M 🎱", shekel: "شيكل 90", label: "Ball Coins" }
+    ],
+    clashofclans: [
+      { amount: "500 Gems", shekel: "شيكل 20", label: "Clash of Clans" },
+      { amount: "1,200 Gems", shekel: "شيكل 35", label: "Clash of Clans" },
+      { amount: "2,500 Gems", shekel: "شيكل 68", label: "Clash of Clans" },
+      { amount: "6,500 Gems", shekel: "شيكل 165", label: "Clash of Clans" }
+    ],
+    snapchat: [
+      { amount: "Plus Monthly", shekel: "شيكل 20", label: "👻" },
+      { amount: "Friends & Family", shekel: "شيكل 32", label: "👻" },
+      { amount: "Plus Monthly", shekel: "شيكل 38", label: "👻" },
+      { amount: "Platinum Monthly", shekel: "شيكل 60", label: "👻" },
+      { amount: "Plus Annual", shekel: "شيكل 100", label: "👻" }
+    ],
+    discord: [
+      { amount: "Nitro Monthly", shekel: "شيكل 18", label: "🎮 Discord" },
+      { amount: "Nitro Monthly", shekel: "شيكل 32", label: "🎮 Discord" },
+      { amount: "Nitro Yearly", shekel: "شيكل 300", label: "🎮 Discord" }
+    ],
+    fcmobile: [
+      { amount: "40 FC", shekel: "شيكل 3", label: "FC Points" },
+      { amount: "100 FC", shekel: "شيكل 5", label: "FC Points" },
+      { amount: "520 FC", shekel: "شيكل 16", label: "FC Points" },
+      { amount: "1,070 FC", shekel: "شيكل 36", label: "FC Points" },
+      { amount: "2,200 FC", shekel: "شيكل 75", label: "FC Points" },
+      { amount: "5,750 FC", shekel: "شيكل 190", label: "FC Points" },
+      { amount: "12,000 FC", shekel: "شيكل 380", label: "FC Points" }
+    ],
+    minecraft: [
+      { amount: "1,720", shekel: "شيكل 35", label: "Minecoins" },
+      { amount: "3,500", shekel: "شيكل 70", label: "Minecoins" },
+      { amount: "8,800", shekel: "شيكل 175", label: "Minecoins" }
+    ]
+  };
+
+  // =============================================
+  // ===== نظام الطلب مع الخادم الخلفي =====
+  // =============================================
+
+  let orderCount = parseInt(localStorage.getItem('orderCount')) || 0;
+  document.getElementById('orderCount').textContent = orderCount;
+
+  let pendingOrder = null;
+
+  // دالة إرسال الطلب إلى الخادم
+  async function submitOrderToServer(orderData) {
+    try {
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData)
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'فشل في إرسال الطلب');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('خطأ في الاتصال بالخادم:', error);
+      throw error;
+    }
+  }
+
+  // دالة تأكيد الطلب
+  window.confirmOrder = async function() {
+    const userId = document.getElementById('userId').value.trim();
+    if (!userId) {
+      const input = document.getElementById('userId');
+      input.style.borderColor = '#ff4444';
+      input.placeholder = '⚠️ الرجاء إدخال ID أو Email';
+      input.focus();
+      return;
+    }
+    document.getElementById('userId').style.borderColor = '#2a2a3a';
+
+    if (!pendingOrder) return;
+
+    const orderData = {
+      product: pendingOrder.tabLabel,
+      details: pendingOrder.productDetail,
+      userId: userId,
+      timestamp: new Date().toISOString()
+    };
+
+    try {
+      // إرسال الطلب إلى الخادم
+      const result = await submitOrderToServer(orderData);
+      console.log('تم حفظ الطلب:', result);
+
+      // زيادة العداد المحلي
+      orderCount++;
+      localStorage.setItem('orderCount', orderCount);
+      document.getElementById('orderCount').textContent = orderCount;
+
+      closeModal();
+      alert(`✅ تم استلام طلبك بنجاح! رقم الطلب: ${result.orderId || 'N/A'}`);
+
+      // (اختياري) فتح واتساب للتأكيد
+      const phone = '970569080887';
+      const message = encodeURIComponent(
+        `🛒 طلب جديد (تم حفظه في الخادم):\n` +
+        `📱 المنتج: ${pendingOrder.tabLabel}\n` +
+        `📦 التفاصيل: ${pendingOrder.productDetail}\n` +
+        `🆔 ID/Email: ${userId}`
+      );
+      window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+
+    } catch (error) {
+      alert('❌ حدث خطأ أثناء إرسال الطلب: ' + error.message);
+    }
+  };
+
+  // فتح المودال
+  window.openModal = function(tabLabel, productDetail) {
+    pendingOrder = { tabLabel, productDetail };
+    document.getElementById('modalProductDetail').textContent = productDetail;
+    document.getElementById('userId').value = '';
+    document.getElementById('orderModal').classList.add('active');
+    document.getElementById('userId').focus();
+  };
+
+  // إغلاق المودال
+  window.closeModal = function() {
+    document.getElementById('orderModal').classList.remove('active');
+    pendingOrder = null;
+  };
+
+  // إدخال الـ ID بالضغط على Enter
+  document.getElementById('userId').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      confirmOrder();
+    }
+  });
+
+  // إغلاق المودال بالنقر خارجها
+  document.getElementById('orderModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeModal();
+    }
+  });
+
+  // =============================================
+  // ===== RENDER TABS & PRODUCTS =====
+  // =============================================
+
+  const tabContainer = document.getElementById('tabContainer');
+  const contentContainer = document.getElementById('contentContainer');
+  const backBtn = document.getElementById('backBtn');
+
+  // إنشاء التبويبات
+  tabsConfig.forEach((tab, index) => {
+    const btn = document.createElement('button');
+    btn.className = `tab-btn ${index === 0 ? 'active' : ''}`;
+    btn.dataset.tab = tab.id;
+    btn.innerHTML = `
+      <span class="tab-icon">${tab.icon}</span>
+      ${tab.label}
+    `;
+    tabContainer.appendChild(btn);
+  });
+
+  // إنشاء محتوى التبويبات
+  tabsConfig.forEach(tab => {
+    const contentDiv = document.createElement('div');
+    contentDiv.className = `tab-content ${tab.id}-tab`;
+    contentDiv.id = tab.id;
+
+    const grid = document.createElement('div');
+    grid.className = 'card-grid';
+    grid.id = `${tab.id}Container`;
+
+    const productsList = products[tab.id] || [];
+
+    productsList.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'card-item';
+
+      let detailHtml = '';
+      let productName = tab.label;
+      let productDetail = '';
+
+      if (p.usd) { detailHtml += `<div class="usd">${p.usd}</div>`; productDetail += p.usd + ' '; }
+      if (p.diamonds) { detailHtml += `<div class="diamonds">${p.diamonds}</div>`; productDetail += p.diamonds + ' '; }
+      if (p.tokens) { detailHtml += `<div class="tokens">${p.tokens}</div>`; productDetail += p.tokens + ' '; }
+      if (p.uc) { detailHtml += `<div class="uc">${p.uc}</div>`; productDetail += p.uc + ' '; }
+      if (p.coins) { detailHtml += `<div class="coins">${p.coins}</div>`; productDetail += p.coins + ' '; }
+      if (p.amount) { detailHtml += `<div class="ps-amount">${p.amount}</div>`; productDetail += p.amount + ' '; }
+      if (p.region) { detailHtml += `<div class="ps-region">${p.region}</div>`; productDetail += p.region + ' '; }
+      if (p.type) { detailHtml += `<div class="nintendo-type">${p.type}</div>`; productDetail += p.type + ' '; }
+      if (p.shekel) { detailHtml += `<div class="shekel">${p.shekel}</div>`; }
+      if (p.label) { detailHtml += `<div class="desc">${p.label}</div>`; productDetail += p.label; }
+
+      const fullDetail = `${productName} | ${productDetail.trim()}`;
+
+      card.innerHTML = `
+        <div class="icon">${tab.icon}</div>
+        ${detailHtml}
+        <button class="order-btn" onclick="openModal('${productName}', '${fullDetail.replace(/'/g, "\\'")}')">
+          <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          اطلب الآن
+        </button>
+      `;
+
+      grid.appendChild(card);
+    });
+
+    contentDiv.appendChild(grid);
+    contentContainer.appendChild(contentDiv);
+  });
+
+  // تبديل التبويبات
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+
+      const target = this.dataset.tab;
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.getElementById(target).classList.add('active');
+
+      backBtn.style.display = 'inline-block';
+
+      setTimeout(() => {
+        const contentTop = contentContainer.getBoundingClientRect().top + window.pageYOffset - 20;
+        window.scrollTo({ top: contentTop, behavior: 'smooth' });
+      }, 100);
+    });
+  });
+
+  window.goBack = function() {
+    const tabsTop = tabContainer.getBoundingClientRect().top + window.pageYOffset - 30;
+    window.scrollTo({ top: tabsTop, behavior: 'smooth' });
+    backBtn.style.display = 'none';
+  };
+
+  // تفعيل أول تبويب
+  if (tabsConfig.length > 0) {
+    document.getElementById(tabsConfig[0].id).classList.add('active');
+  }
+</script>
+
+</body>
+</html>
