@@ -473,7 +473,7 @@
   };
 
   // =============================================
-  // ===== نظام الطلب مع الخادم الخلفي =====
+  // ===== نظام الطلب مع فتح واتساب فوراً =====
   // =============================================
 
   let orderCount = parseInt(localStorage.getItem('orderCount')) || 0;
@@ -481,6 +481,7 @@
 
   let pendingOrder = null;
 
+  // دالة إرسال الطلب إلى الخادم (اختيارية)
   async function submitOrderToServer(orderData) {
     try {
       const response = await fetch('/api/orders', {
@@ -512,6 +513,7 @@
 
     if (!pendingOrder) return;
 
+    // ===== 1. تحضير بيانات الطلب =====
     const orderData = {
       product: pendingOrder.tabLabel,
       details: pendingOrder.productDetail,
@@ -519,28 +521,31 @@
       timestamp: new Date().toISOString()
     };
 
+    // ===== 2. فتح واتساب فوراً =====
+    const phone = '970569080887'; // بدون +
+    const message = encodeURIComponent(
+      `🛒 طلب جديد:\n` +
+      `📱 المنتج: ${pendingOrder.tabLabel}\n` +
+      `📦 التفاصيل: ${pendingOrder.productDetail}\n` +
+      `🆔 ID/Email: ${userId}`
+    );
+    window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+
+    // ===== 3. محاولة إرسال الطلب إلى الخادم (اختياري) =====
     try {
       const result = await submitOrderToServer(orderData);
-      console.log('تم حفظ الطلب:', result);
-
+      console.log('تم حفظ الطلب في الخادم:', result);
+      // زيادة العداد المحلي
       orderCount++;
       localStorage.setItem('orderCount', orderCount);
       document.getElementById('orderCount').textContent = orderCount;
-
       closeModal();
       alert(`✅ تم استلام طلبك بنجاح! رقم الطلب: ${result.orderId || 'N/A'}`);
-
-      const phone = '970569080887';
-      const message = encodeURIComponent(
-        `🛒 طلب جديد (تم حفظه في الخادم):\n` +
-        `📱 المنتج: ${pendingOrder.tabLabel}\n` +
-        `📦 التفاصيل: ${pendingOrder.productDetail}\n` +
-        `🆔 ID/Email: ${userId}`
-      );
-      window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
-
     } catch (error) {
-      alert('❌ حدث خطأ أثناء إرسال الطلب: ' + error.message);
+      console.error('فشل في إرسال الطلب للخادم:', error);
+      // نغلق المودال ونعطي رسالة بسيطة (واتساب مفتوح بالفعل)
+      closeModal();
+      alert('⚠️ تم فتح واتساب لإرسال طلبك، ولكن حدث خطأ في حفظ الطلب على الخادم. يمكنك متابعة الطلب عبر واتساب.');
     }
   };
 
@@ -601,7 +606,6 @@
 
     const productsList = products[tab.id] || [];
 
-    // ----- التعديل: بناء البطاقات بدون onclick مباشر -----
     productsList.forEach(p => {
       const card = document.createElement('div');
       card.className = 'card-item';
@@ -633,12 +637,10 @@
         اطلب الآن
       `;
 
-      // إضافة محتوى البطاقة (بدون الزر في innerHTML)
       card.innerHTML = `
         <div class="icon">${tab.icon}</div>
         ${detailHtml}
       `;
-      // إلحاق الزر كعنصر منفصل
       card.appendChild(orderBtn);
       grid.appendChild(card);
     });
