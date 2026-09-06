@@ -522,12 +522,12 @@
       timestamp: new Date().toISOString()
     };
 
-    // ===== 2. فتح واتساب فوراً =====
+    // ===== 2. فتح واتساب فوراً مع السعر =====
     const phone = '970569080887'; // بدون +
     const message = encodeURIComponent(
       `🛒 طلب جديد:\n` +
       `📱 المنتج: ${pendingOrder.tabLabel}\n` +
-      `📦 التفاصيل: ${pendingOrder.productDetail}\n` +
+      `📦 التفاصيل: ${pendingOrder.productDetail}\n` + // يحتوي على السعر الآن
       `🆔 ID/Email: ${userId}`
     );
     window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
@@ -576,7 +576,7 @@
   });
 
   // =============================================
-  // ===== RENDER TABS & PRODUCTS =====
+  // ===== RENDER TABS & PRODUCTS (مع إضافة السعر إلى productDetail) =====
   // =============================================
 
   const tabContainer = document.getElementById('tabContainer');
@@ -615,6 +615,7 @@
       let productName = tab.label;
       let productDetail = '';
 
+      // نضيف كل الحقول إلى productDetail بما فيها السعر
       if (p.usd) { detailHtml += `<div class="usd">${p.usd}</div>`; productDetail += p.usd + ' '; }
       if (p.diamonds) { detailHtml += `<div class="diamonds">${p.diamonds}</div>`; productDetail += p.diamonds + ' '; }
       if (p.tokens) { detailHtml += `<div class="tokens">${p.tokens}</div>`; productDetail += p.tokens + ' '; }
@@ -623,7 +624,11 @@
       if (p.amount) { detailHtml += `<div class="ps-amount">${p.amount}</div>`; productDetail += p.amount + ' '; }
       if (p.region) { detailHtml += `<div class="ps-region">${p.region}</div>`; productDetail += p.region + ' '; }
       if (p.type) { detailHtml += `<div class="nintendo-type">${p.type}</div>`; productDetail += p.type + ' '; }
-      if (p.shekel) { detailHtml += `<div class="shekel">${p.shekel}</div>`; }
+      // ===== إضافة السعر (شيكل) إلى productDetail =====
+      if (p.shekel) { 
+        detailHtml += `<div class="shekel">${p.shekel}</div>`; 
+        productDetail += p.shekel + ' '; 
+      }
       if (p.label) { detailHtml += `<div class="desc">${p.label}</div>`; productDetail += p.label; }
 
       const fullDetail = `${productName} | ${productDetail.trim()}`;
