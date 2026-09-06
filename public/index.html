@@ -146,10 +146,14 @@
 
 <script>
   // =============================================
-  // ===== DATA (تم إزالة labels من iTunes) =====
+  // ===== DATA (يتم جلبها الآن من الخادم /api/products) =====
   // =============================================
 
-  const tabsConfig = [
+  let tabsConfig = [];
+  let products = {};
+
+  // نسخة احتياطية قديمة (تُستخدم فقط إذا فشل الاتصال بالخادم)
+  const fallbackTabsConfig = [
     { id: 'itunes', label: '🍎 iTunes', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-84,h-23,c-at_least/storage/card-categories/a634bf28ac1c2af14d24ef545123f77b-1695199694.webp" alt="iTunes" style="width:133px;height:133px;object-fit:contain;" />' },
     { id: 'freefire', label: '🔥 فري فاير', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-159,h-23,c-at_least/storage/card-categories/470118d7c59eff087dae0d80449a3c17-1730885495.webp" alt="FreeFire" style="width:133px;height:133px;object-fit:contain;" />' },
     { id: 'jawaker', label: '💎 جواكر', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-116,h-20,c-at_least/storage/card-categories/d9255800c517875822e36d7b527f437a-1730884583.webp" alt="Jawaker" style="width:133px;height:133px;object-fit:contain;" />' },
@@ -182,7 +186,7 @@
     { id: 'minecraft', label: '⛏️ Minecraft', icon: '<img src="https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-98,h-23,c-at_least/storage/card-categories/4e6307ca0931b629b5985a65343cd04d-1695203235.webp" alt="Minecraft" style="width:133px;height:133px;object-fit:contain;" />' }
   ];
 
-  const products = {
+  const fallbackProducts = {
     // ===== تم إزالة جميع labels من iTunes (جعلها فارغة) =====
     itunes: [
       { shekel: "شيكل 18", usd: "دولار 5", label: "" },
@@ -583,6 +587,25 @@
   const contentContainer = document.getElementById('contentContainer');
   const backBtn = document.getElementById('backBtn');
 
+  async function loadProductsData() {
+    try {
+      const res = await fetch('/api/products');
+      if (!res.ok) throw new Error('bad response');
+      const data = await res.json();
+      if (Array.isArray(data.tabsConfig) && data.tabsConfig.length > 0) {
+        tabsConfig = data.tabsConfig;
+        products = data.products || {};
+        return;
+      }
+      throw new Error('empty data');
+    } catch (err) {
+      console.warn('تعذر جلب البيانات من الخادم، تم استخدام النسخة الاحتياطية', err);
+      tabsConfig = fallbackTabsConfig;
+      products = fallbackProducts;
+    }
+  }
+
+  function renderStore() {
   // إنشاء التبويبات
   tabsConfig.forEach((tab, index) => {
     const btn = document.createElement('button');
@@ -697,6 +720,9 @@
   if (tabsConfig.length > 0) {
     document.getElementById(tabsConfig[0].id).classList.add('active');
   }
+  } // نهاية renderStore()
+
+  loadProductsData().then(renderStore);
 </script>
 
 </body>
