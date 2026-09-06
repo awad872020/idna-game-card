@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>لوحة تحكم الأدمن - Idna Gaming Card</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Roboto, system-ui, sans-serif; }
+  body { background:#0b0b0e; color:#f0f0ff; min-height:100vh; }
+  a { color:inherit; }
+
+  /* ===== شاشة تسجيل الدخول ===== */
+  #loginScreen { display:flex; align-items:center; justify-content:center; min-height:100vh; padding:20px; }
+  .login-box { background:#16161f; border:1px solid #2a2a3a; border-radius:24px; padding:40px 32px; max-width:380px; width:100%; box-shadow:0 12px 40px rgba(0,0,0,0.7); }
+  .login-box h1 { text-align:center; font-size:1.5rem; margin-bottom:6px; background:linear-gradient(135deg,#f5f5ff,#a0c0ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .login-box p.sub { text-align:center; color:#9a9ab0; margin-bottom:24px; font-size:0.9rem; }
+  .login-box label { display:block; color:#b0b0dd; font-size:0.9rem; font-weight:600; margin:14px 0 6px; }
+  .login-box input { width:100%; padding:12px 14px; background:#0b0b0e; border:2px solid #2a2a3a; border-radius:12px; color:#f0f0ff; font-size:1rem; outline:none; transition:0.2s; }
+  .login-box input:focus { border-color:#ffd700; }
+  .login-box button { width:100%; margin-top:22px; padding:13px; border:none; border-radius:40px; background:#ffd700; color:#0b0b0e; font-weight:700; font-size:1rem; cursor:pointer; transition:0.2s; }
+  .login-box button:hover { background:#ffe44d; }
+  .login-error { margin-top:14px; color:#ff6b6b; font-size:0.85rem; text-align:center; display:none; }
+
+  /* ===== لوحة التحكم ===== */
+  #dashboard { display:none; }
+  header.topbar { display:flex; align-items:center; justify-content:space-between; padding:16px 26px; background:#14141f; border-bottom:1px solid #2a2a3a; position:sticky; top:0; z-index:10; flex-wrap:wrap; gap:10px; }
+  header.topbar h1 { font-size:1.2rem; color:#ffd700; }
+  header.topbar .actions { display:flex; gap:10px; align-items:center; }
+  .btn { padding:9px 18px; border-radius:30px; border:2px solid #2a2a3a; background:#1a1a2e; color:#f0f0ff; cursor:pointer; font-weight:600; font-size:0.9rem; transition:0.2s; }
+  .btn:hover { border-color:#ffd700; color:#ffd700; }
+  .btn.primary { background:#ffd700; border-color:#ffd700; color:#0b0b0e; }
+  .btn.primary:hover { background:#ffe44d; }
+  .btn.danger { border-color:#ff6b6b; color:#ff6b6b; }
+  .btn.danger:hover { background:#ff6b6b; color:#0b0b0e; }
+  .btn.small { padding:6px 12px; font-size:0.8rem; }
+
+  nav.tabs-nav { display:flex; gap:10px; padding:16px 26px 0; flex-wrap:wrap; }
+  nav.tabs-nav button { padding:10px 20px; border-radius:30px; border:2px solid #2a2a3a; background:#16161f; color:#9a9aba; cursor:pointer; font-weight:600; }
+  nav.tabs-nav button.active { border-color:#ffd700; color:#ffd700; background:#1a1a2e; }
+
+  main { padding:20px 26px 60px; max-width:1300px; margin:0 auto; }
+  .section { display:none; }
+  .section.active { display:block; }
+
+  .stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; margin-bottom:22px; }
+  .stat-card { background:#16161f; border:1px solid #2a2a3a; border-radius:18px; padding:18px; text-align:center; }
+  .stat-card .num { font-size:1.8rem; font-weight:700; color:#ffd700; }
+  .stat-card .label { color:#9a9ab0; font-size:0.85rem; margin-top:4px; }
+
+  .filters { display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; align-items:center; }
+  .filters select, .filters input { padding:9px 14px; border-radius:20px; border:2px solid #2a2a3a; background:#16161f; color:#f0f0ff; font-size:0.9rem; outline:none; }
+
+  table { width:100%; border-collapse:collapse; background:#16161f; border-radius:14px; overflow:hidden; }
+  thead th { background:#1a1a2e; color:#ffd700; text-align:right; padding:12px 14px; font-size:0.85rem; }
+  tbody td { padding:12px 14px; border-top:1px solid #22223a; font-size:0.88rem; vertical-align:top; }
+  tbody tr:hover { background:#1b1b2a; }
+  .status-badge { padding:4px 12px; border-radius:20px; font-size:0.78rem; font-weight:700; display:inline-block; }
+  .status-pending { background:#3a3a1a; color:#ffd700; }
+  .status-completed { background:#1a3a24; color:#4ade80; }
+  .status-cancelled { background:#3a1a1a; color:#ff6b6b; }
+  .row-actions { display:flex; gap:6px; flex-wrap:wrap; }
+  select.status-select { padding:6px 10px; border-radius:14px; background:#0b0b0e; border:1px solid #2a2a3a; color:#f0f0ff; font-size:0.8rem; }
+
+  .empty-state { text-align:center; padding:50px 20px; color:#7a7a9a; }
+
+  /* ===== قسم المنتجات ===== */
+  .products-layout { display:grid; grid-template-columns:220px 1fr; gap:20px; align-items:start; }
+  .tab-list { background:#16161f; border:1px solid #2a2a3a; border-radius:14px; padding:10px; max-height:70vh; overflow-y:auto; }
+  .tab-list-item { padding:10px 12px; border-radius:10px; cursor:pointer; font-size:0.88rem; color:#b0b0dd; margin-bottom:4px; display:flex; justify-content:space-between; align-items:center; }
+  .tab-list-item:hover { background:#1b1b2a; }
+  .tab-list-item.active { background:#1a1a2e; color:#ffd700; border:1px solid #ffd700; }
+
+  .product-editor { background:#16161f; border:1px solid #2a2a3a; border-radius:14px; padding:18px; }
+  .product-editor h3 { color:#ffd700; margin-bottom:14px; font-size:1.1rem; }
+  .item-row { display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; align-items:center; background:#0b0b0e; padding:10px; border-radius:12px; border:1px solid #22223a; }
+  .item-row .field { display:flex; flex-direction:column; gap:3px; min-width:110px; flex:1; }
+  .item-row .field label { font-size:0.7rem; color:#7a7a9a; }
+  .item-row .field input { padding:8px 10px; border-radius:8px; border:1px solid #2a2a3a; background:#14141f; color:#f0f0ff; font-size:0.85rem; outline:none; }
+  .item-row .field input:focus { border-color:#ffd700; }
+
+  .add-tab-form { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; padding-top:14px; border-top:1px solid #22223a; }
+  .add-tab-form input { flex:1; min-width:120px; padding:9px 12px; border-radius:10px; border:1px solid #2a2a3a; background:#0b0b0e; color:#f0f0ff; font-size:0.85rem; outline:none; }
+
+  .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:#1a1a2e; border:1px solid #ffd700; color:#ffd700; padding:12px 24px; border-radius:30px; font-weight:600; font-size:0.9rem; z-index:999; opacity:0; pointer-events:none; transition:0.3s; }
+  .toast.show { opacity:1; }
+
+  @media (max-width:720px) {
+    .products-layout { grid-template-columns:1fr; }
+    .tab-list { max-height:200px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== شاشة تسجيل الدخول ===== -->
+<div id="loginScreen">
+  <div class="login-box">
+    <h1>🔐 لوحة تحكم الأدمن</h1>
+    <p class="sub">Idna Gaming Card</p>
+    <label for="loginUser">اسم المستخدم</label>
+    <input type="text" id="loginUser" autocomplete="username" />
+    <label for="loginPass">كلمة المرور</label>
+    <input type="password" id="loginPass" autocomplete="current-password" />
+    <button onclick="doLogin()">تسجيل الدخول</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<!-- ===== لوحة التحكم ===== -->
+<div id="dashboard">
+  <header class="topbar">
+    <h1>🎮 لوحة تحكم Idna Gaming Card</h1>
+    <div class="actions">
+      <a href="/" target="_blank"><button class="btn">👁 عرض الموقع</button></a>
+      <button class="btn danger" onclick="doLogout()">🚪 تسجيل الخروج</button>
+    </div>
+  </header>
+
+  <nav class="tabs-nav">
+    <button class="nav-btn active" data-section="ordersSection" onclick="switchSection('ordersSection', this)">📦 الطلبات</button>
+    <button class="nav-btn" data-section="productsSection" onclick="switchSection('productsSection', this)">💰 المنتجات والأسعار</button>
+  </nav>
+
+  <main>
+    <!-- قسم الطلبات -->
+    <section class="section active" id="ordersSection">
+      <div class="stats-row" id="statsRow"></div>
+
+      <div class="filters">
+        <select id="statusFilter" onchange="renderOrders()">
+          <option value="all">كل الحالات</option>
+          <option value="pending">قيد الانتظار</option>
+          <option value="completed">مكتمل</option>
+          <option value="cancelled">ملغي</option>
+        </select>
+        <input type="text" id="searchOrders" placeholder="🔍 بحث بالـ ID أو المنتج..." oninput="renderOrders()" />
+        <button class="btn small" onclick="loadOrders()">🔄 تحديث</button>
+      </div>
+
+      <div id="ordersTableWrap"></div>
+    </section>
+
+    <!-- قسم المنتجات -->
+    <section class="section" id="productsSection">
+      <div class="products-layout">
+        <div class="tab-list" id="tabList"></div>
+        <div class="product-editor" id="productEditor">
+          <div class="empty-state">اختر قسمًا من القائمة لتعديل أسعاره</div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let allOrders = [];
+let productsData = { tabsConfig: [], products: {} };
+let activeTabId = null;
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+async function api(url, opts = {}) {
+  const res = await fetch(url, {
+    ...opts,
+    headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) },
+    credentials: 'include'
+  });
+  if (res.status === 401) {
+    showLogin();
+    throw new Error('unauthorized');
+  }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'حدث خطأ');
+  return data;
+}
+
+function showLogin() {
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('dashboard').style.display = 'none';
+}
+function showDashboard() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  loadOrders();
+  loadProducts();
+}
+
+async function checkAuth() {
+  try {
+    const data = await api('/api/admin/check');
+    if (data.authenticated) showDashboard();
+    else showLogin();
+  } catch (e) {
+    showLogin();
+  }
+}
+
+async function doLogin() {
+  const username = document.getElementById('loginUser').value.trim();
+  const password = document.getElementById('loginPass').value;
+  const errBox = document.getElementById('loginError');
+  errBox.style.display = 'none';
+  try {
+    const res = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'فشل تسجيل الدخول');
+    showDashboard();
+  } catch (e) {
+    errBox.textContent = e.message;
+    errBox.style.display = 'block';
+  }
+}
+
+async function doLogout() {
+  await fetch('/api/admin/logout', { method: 'POST', credentials: 'include' });
+  showLogin();
+}
+
+document.getElementById('loginPass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+function switchSection(sectionId, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(sectionId).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ================= الطلبات =================
+async function loadOrders() {
+  try {
+    allOrders = await api('/api/admin/orders');
+    renderOrders();
+  } catch (e) {
+    if (e.message !== 'unauthorized') showToast('❌ ' + e.message);
+  }
+}
+
+function renderStats() {
+  const today = new Date().toDateString();
+  const todayCount = allOrders.filter(o => new Date(o.timestamp).toDateString() === today).length;
+  const pending = allOrders.filter(o => o.status === 'pending').length;
+  const completed = allOrders.filter(o => o.status === 'completed').length;
+
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-card"><div class="num">${allOrders.length}</div><div class="label">إجمالي الطلبات</div></div>
+    <div class="stat-card"><div class="num">${todayCount}</div><div class="label">طلبات اليوم</div></div>
+    <div class="stat-card"><div class="num">${pending}</div><div class="label">قيد الانتظار</div></div>
+    <div class="stat-card"><div class="num">${completed}</div><div class="label">مكتملة</div></div>
+  `;
+}
+
+function statusLabel(s) {
+  return { pending: 'قيد الانتظار', completed: 'مكتمل', cancelled: 'ملغي' }[s] || s;
+}
+
+function renderOrders() {
+  renderStats();
+  const filter = document.getElementById('statusFilter').value;
+  const search = document.getElementById('searchOrders').value.trim().toLowerCase();
+
+  let list = allOrders;
+  if (filter !== 'all') list = list.filter(o => o.status === filter);
+  if (search) {
+    list = list.filter(o =>
+      (o.userId || '').toLowerCase().includes(search) ||
+      (o.product || '').toLowerCase().includes(search) ||
+      (o.details || '').toLowerCase().includes(search)
+    );
+  }
+
+  const wrap = document.getElementById('ordersTableWrap');
+  if (list.length === 0) {
+    wrap.innerHTML = '<div class="empty-state">لا توجد طلبات مطابقة</div>';
+    return;
+  }
+
+  wrap.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>#</th><th>المنتج</th><th>التفاصيل</th><th>ID / Email</th><th>التاريخ</th><th>الحالة</th><th>إجراءات</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${list.map(o => `
+          <tr>
+            <td>${o.id}</td>
+            <td>${escapeHtml(o.product)}</td>
+            <td>${escapeHtml(o.details)}</td>
+            <td dir="ltr" style="text-align:right">${escapeHtml(o.userId)}</td>
+            <td>${new Date(o.timestamp).toLocaleString('ar-EG')}</td>
+            <td><span class="status-badge status-${o.status}">${statusLabel(o.status)}</span></td>
+            <td>
+              <div class="row-actions">
+                <select class="status-select" onchange="updateOrderStatus(${o.id}, this.value)">
+                  <option value="pending" ${o.status === 'pending' ? 'selected' : ''}>قيد الانتظار</option>
+                  <option value="completed" ${o.status === 'completed' ? 'selected' : ''}>مكتمل</option>
+                  <option value="cancelled" ${o.status === 'cancelled' ? 'selected' : ''}>ملغي</option>
+                </select>
+                <button class="btn small danger" onclick="deleteOrder(${o.id})">🗑</button>
+              </div>
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+async function updateOrderStatus(id, status) {
+  try {
+    await api(`/api/admin/orders/${id}`, { method: 'PATCH', body: JSON.stringify({ status }) });
+    const o = allOrders.find(x => String(x.id) === String(id));
+    if (o) o.status = status;
+    renderOrders();
+    showToast('✅ تم تحديث حالة الطلب');
+  } catch (e) {
+    showToast('❌ ' + e.message);
+  }
+}
+
+async function deleteOrder(id) {
+  if (!confirm('هل أنت متأكد من حذف هذا الطلب؟')) return;
+  try {
+    await api(`/api/admin/orders/${id}`, { method: 'DELETE' });
+    allOrders = allOrders.filter(o => String(o.id) !== String(id));
+    renderOrders();
+    showToast('🗑 تم حذف الطلب');
+  } catch (e) {
+    showToast('❌ ' + e.message);
+  }
+}
+
+function escapeHtml(str) {
+  if (str === undefined || str === null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// ================= المنتجات =================
+async function loadProducts() {
+  try {
+    productsData = await api('/api/admin/products');
+    renderTabList();
+    if (activeTabId && productsData.products[activeTabId]) {
+      renderProductEditor(activeTabId);
+    }
+  } catch (e) {
+    if (e.message !== 'unauthorized') showToast('❌ ' + e.message);
+  }
+}
+
+function renderTabList() {
+  const wrap = document.getElementById('tabList');
+  wrap.innerHTML = productsData.tabsConfig.map(t => `
+    <div class="tab-list-item ${t.id === activeTabId ? 'active' : ''}" onclick="selectTab('${t.id}')">
+      <span>${escapeHtml(stripEmoji(t.label))}</span>
+    </div>
+  `).join('') + `
+    <div class="add-tab-form">
+      <input type="text" id="newTabId" placeholder="معرف (English)" />
+      <input type="text" id="newTabLabel" placeholder="اسم القسم" />
+      <input type="text" id="newTabIcon" placeholder="رابط أيقونة (اختياري)" style="flex-basis:100%;" />
+      <button class="btn small primary" style="flex-basis:100%;" onclick="addTab()">➕ إضافة قسم جديد</button>
+    </div>
+  `;
+}
+
+function stripEmoji(s) { return s; }
+
+function selectTab(id) {
+  activeTabId = id;
+  renderTabList();
+  renderProductEditor(id);
+}
+
+function renderProductEditor(tabId) {
+  const tab = productsData.tabsConfig.find(t => t.id === tabId);
+  const items = productsData.products[tabId] || [];
+  const editor = document.getElementById('productEditor');
+
+  if (!tab) {
+    editor.innerHTML = '<div class="empty-state">القسم غير موجود</div>';
+    return;
+  }
+
+  // اجمع كل مفاتيح الحقول المستخدمة في هذا القسم
+  const keysSet = new Set();
+  items.forEach(it => Object.keys(it).forEach(k => keysSet.add(k)));
+  if (keysSet.size === 0) { ['amount', 'shekel', 'label'].forEach(k => keysSet.add(k)); }
+  const keys = Array.from(keysSet);
+
+  editor.innerHTML = `
+    <h3>${tab.label} — تعديل الأسعار</h3>
+    <div id="itemsWrap"></div>
+    <div style="display:flex; gap:10px; margin-top:14px; flex-wrap:wrap;">
+      <button class="btn small primary" onclick="addItem('${tabId}')">➕ إضافة عنصر</button>
+      <button class="btn small" onclick="saveItems('${tabId}')">💾 حفظ التغييرات</button>
+      <button class="btn small" onclick="editTabInfo('${tabId}')">✏️ تعديل اسم القسم</button>
+      <button class="btn small danger" onclick="deleteTab('${tabId}')">🗑 حذف القسم بالكامل</button>
+    </div>
+  `;
+
+  const itemsWrap = document.getElementById('itemsWrap');
+
+  if (items.length === 0) {
+    itemsWrap.innerHTML = '<div class="empty-state">لا توجد عناصر بعد. اضغط "إضافة عنصر" للبدء.</div>';
+  } else {
+    itemsWrap.innerHTML = items.map((item, idx) => `
+      <div class="item-row" data-idx="${idx}">
+        ${keys.map(k => `
+          <div class="field">
+            <label>${fieldLabel(k)}</label>
+            <input type="text" data-key="${k}" value="${escapeHtml(item[k] || '')}" />
+          </div>
+        `).join('')}
+        <button class="btn small danger" onclick="removeItem(${idx})" title="حذف">🗑</button>
+      </div>
+    `).join('');
+  }
+
+  editor.dataset.keys = JSON.stringify(keys);
+}
+
+function fieldLabel(k) {
+  const map = {
+    shekel: '💰 السعر (شيكل)', usd: 'دولار', diamonds: 'جواهر', tokens: 'رموز', uc: 'UC',
+    coins: 'عملات', amount: 'الكمية/القيمة', region: 'المنطقة', type: 'النوع', label: '📝 وصف'
+  };
+  return map[k] || k;
+}
+
+function addItem(tabId) {
+  const editor = document.getElementById('productEditor');
+  const keys = JSON.parse(editor.dataset.keys || '[]');
+  const itemsWrap = document.getElementById('itemsWrap');
+  if (itemsWrap.querySelector('.empty-state')) itemsWrap.innerHTML = '';
+
+  const idx = itemsWrap.querySelectorAll('.item-row').length;
+  const row = document.createElement('div');
+  row.className = 'item-row';
+  row.dataset.idx = idx;
+  row.innerHTML = `
+    ${keys.map(k => `
+      <div class="field">
+        <label>${fieldLabel(k)}</label>
+        <input type="text" data-key="${k}" value="" />
+      </div>
+    `).join('')}
+    <button class="btn small danger" onclick="this.closest('.item-row').remove()" title="حذف">🗑</button>
+  `;
+  itemsWrap.appendChild(row);
+}
+
+function removeItem(idx) {
+  const row = document.querySelector(`.item-row[data-idx="${idx}"]`);
+  if (row) row.remove();
+}
+
+async function saveItems(tabId) {
+  const rows = document.querySelectorAll('#itemsWrap .item-row');
+  const items = Array.from(rows).map(row => {
+    const obj = {};
+    row.querySelectorAll('input[data-key]').forEach(inp => {
+      const val = inp.value.trim();
+      if (val) obj[inp.dataset.key] = val;
+    });
+    return obj;
+  }).filter(obj => Object.keys(obj).length > 0);
+
+  try {
+    await api(`/api/admin/products/${tabId}`, { method: 'PUT', body: JSON.stringify({ items }) });
+    productsData.products[tabId] = items;
+    showToast('✅ تم حفظ التغييرات بنجاح');
+  } catch (e) {
+    showToast('❌ ' + e.message);
+  }
+}
+
+async function addTab() {
+  const id = document.getElementById('newTabId').value.trim();
+  const label = document.getElementById('newTabLabel').value.trim();
+  const iconUrl = document.getElementById('newTabIcon').value.trim();
+
+  if (!id || !label) { showToast('❌ الرجاء إدخال المعرف والاسم'); return; }
+
+  try {
+    await api('/api/admin/tabs', { method: 'POST', body: JSON.stringify({ id, label, iconUrl }) });
+    showToast('✅ تم إضافة القسم');
+    activeTabId = id;
+    await loadProducts();
+    selectTab(id);
+  } catch (e) {
+    showToast('❌ ' + e.message);
+  }
+}
+
+async function editTabInfo(tabId) {
+  const tab = productsData.tabsConfig.find(t => t.id === tabId);
+  const newLabel = prompt('اسم القسم الجديد:', tab ? tab.label : '');
+  if (newLabel === null) return;
+  const newIcon = prompt('رابط أيقونة جديد (اتركه فارغًا للإبقاء على الحالي):', '');
+
+  try {
+    await api(`/api/admin/tabs/${tabId}`, { method: 'PUT', body: JSON.stringify({ label: newLabel, iconUrl: newIcon || undefined }) });
+    showToast('✅ تم التحديث');
+    await loadProducts();
+  } catch (e) {
+    showToast('❌ ' + e.message);
+  }
+}
+
+async function deleteTab(tabId) {
+  if (!confirm('هل أنت متأكد من حذف هذا القسم بكل عناصره؟ لا يمكن التراجع.')) return;
+  try {
+    await api(`/api/admin/tabs/${tabId}`, { method: 'DELETE' });
+    showToast('🗑 تم حذف القسم');
+    activeTabId = null;
+    document.getElementById('productEditor').innerHTML = '<div class="empty-state">اختر قسمًا من القائمة لتعديل أسعاره</div>';
+    await loadProducts();
+  } catch (e) {
+    showToast('❌ ' + e.message);
+  }
+}
+
+checkAuth();
+</script>
+</body>
+</html>
