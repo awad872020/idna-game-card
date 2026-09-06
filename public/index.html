@@ -5,10 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>متجر البطاقات - Idna Gaming Card</title>
   <style>
-    /* ===== جميع الأنماط من الإصدار السابق (تم حذفها للاختصار هنا، لكن ستكون موجودة في الملف الفعلي) ===== */
-    /* يرجى نسخ الأنماط الكاملة من الإجابة السابقة أو من المرفق */
+    /* ===== جميع الأنماط مع إضافة zoom للتصغير ===== */
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, system-ui, sans-serif; }
-    body { background: #0b0b0e; padding: 20px; min-height: 100vh; }
+    body { 
+      background: #0b0b0e; 
+      padding: 20px; 
+      min-height: 100vh; 
+      zoom: 0.8; /* تم تصغير حجم الصفحة إلى 80% */
+    }
     .store-header { text-align: center; padding: 34px 20px 28px; background: linear-gradient(145deg, #14141f, #1c1c2e); border: 1px solid #2a2a3a; border-radius: 32px; margin-bottom: 32px; box-shadow: 0 12px 40px rgba(0,0,0,0.7); }
     .store-header h1 { font-size: 2.4rem; font-weight: 700; background: linear-gradient(135deg, #f5f5ff, #a0c0ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     .store-header .subtitle { color: #9a9ab0; font-size: 1.1rem; margin-top: 6px; }
@@ -477,7 +481,6 @@
 
   let pendingOrder = null;
 
-  // دالة إرسال الطلب إلى الخادم
   async function submitOrderToServer(orderData) {
     try {
       const response = await fetch('/api/orders', {
@@ -496,7 +499,6 @@
     }
   }
 
-  // دالة تأكيد الطلب
   window.confirmOrder = async function() {
     const userId = document.getElementById('userId').value.trim();
     if (!userId) {
@@ -518,11 +520,9 @@
     };
 
     try {
-      // إرسال الطلب إلى الخادم
       const result = await submitOrderToServer(orderData);
       console.log('تم حفظ الطلب:', result);
 
-      // زيادة العداد المحلي
       orderCount++;
       localStorage.setItem('orderCount', orderCount);
       document.getElementById('orderCount').textContent = orderCount;
@@ -530,7 +530,6 @@
       closeModal();
       alert(`✅ تم استلام طلبك بنجاح! رقم الطلب: ${result.orderId || 'N/A'}`);
 
-      // (اختياري) فتح واتساب للتأكيد
       const phone = '970569080887';
       const message = encodeURIComponent(
         `🛒 طلب جديد (تم حفظه في الخادم):\n` +
@@ -545,7 +544,6 @@
     }
   };
 
-  // فتح المودال
   window.openModal = function(tabLabel, productDetail) {
     pendingOrder = { tabLabel, productDetail };
     document.getElementById('modalProductDetail').textContent = productDetail;
@@ -554,20 +552,17 @@
     document.getElementById('userId').focus();
   };
 
-  // إغلاق المودال
   window.closeModal = function() {
     document.getElementById('orderModal').classList.remove('active');
     pendingOrder = null;
   };
 
-  // إدخال الـ ID بالضغط على Enter
   document.getElementById('userId').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') {
       confirmOrder();
     }
   });
 
-  // إغلاق المودال بالنقر خارجها
   document.getElementById('orderModal').addEventListener('click', function(e) {
     if (e.target === this) {
       closeModal();
@@ -606,6 +601,7 @@
 
     const productsList = products[tab.id] || [];
 
+    // ----- التعديل: بناء البطاقات بدون onclick مباشر -----
     productsList.forEach(p => {
       const card = document.createElement('div');
       card.className = 'card-item';
@@ -627,20 +623,41 @@
 
       const fullDetail = `${productName} | ${productDetail.trim()}`;
 
+      // إنشاء الزر مع data attributes
+      const orderBtn = document.createElement('button');
+      orderBtn.className = 'order-btn';
+      orderBtn.dataset.productName = productName;
+      orderBtn.dataset.productDetail = fullDetail;
+      orderBtn.innerHTML = `
+        <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        اطلب الآن
+      `;
+
+      // إضافة محتوى البطاقة (بدون الزر في innerHTML)
       card.innerHTML = `
         <div class="icon">${tab.icon}</div>
         ${detailHtml}
-        <button class="order-btn" onclick="openModal('${productName}', '${fullDetail.replace(/'/g, "\\'")}')">
-          <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-          اطلب الآن
-        </button>
       `;
-
+      // إلحاق الزر كعنصر منفصل
+      card.appendChild(orderBtn);
       grid.appendChild(card);
     });
 
     contentDiv.appendChild(grid);
     contentContainer.appendChild(contentDiv);
+  });
+
+  // ===== مستمع الأحداث العام لأزرار الطلب (بديل عن onclick) =====
+  document.addEventListener('click', function(e) {
+    const target = e.target.closest('.order-btn');
+    if (!target) return;
+
+    const productName = target.dataset.productName;
+    const productDetail = target.dataset.productDetail;
+
+    if (productName && productDetail) {
+      openModal(productName, productDetail);
+    }
   });
 
   // تبديل التبويبات
