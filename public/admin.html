@@ -77,6 +77,9 @@
   .item-row .field label { font-size:0.7rem; color:#7a7a9a; }
   .item-row .field input { padding:8px 10px; border-radius:8px; border:1px solid #2a2a3a; background:#14141f; color:#f0f0ff; font-size:0.85rem; outline:none; }
   .item-row .field input:focus { border-color:#ffd700; }
+  .reorder-btns { display:flex; flex-direction:column; gap:4px; }
+  .reorder-btns button { padding:4px 10px; line-height:1; }
+  .reorder-btns button:disabled { opacity:0.3; cursor:not-allowed; }
 
   .add-tab-form { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; padding-top:14px; border-top:1px solid #22223a; }
   .add-tab-form input { flex:1; min-width:120px; padding:9px 12px; border-radius:10px; border:1px solid #2a2a3a; background:#0b0b0e; color:#f0f0ff; font-size:0.85rem; outline:none; }
@@ -429,6 +432,10 @@ function renderProductEditor(tabId) {
             <input type="text" data-key="${k}" value="${escapeHtml(item[k] || '')}" />
           </div>
         `).join('')}
+        <div class="reorder-btns">
+          <button class="btn small" onclick="moveItem(${idx}, -1)" title="نقل لأعلى" ${idx === 0 ? 'disabled' : ''}>⬆️</button>
+          <button class="btn small" onclick="moveItem(${idx}, 1)" title="نقل لأسفل" ${idx === items.length - 1 ? 'disabled' : ''}>⬇️</button>
+        </div>
         <button class="btn small danger" onclick="removeItem(${idx})" title="حذف">🗑</button>
       </div>
     `).join('');
@@ -462,14 +469,59 @@ function addItem(tabId) {
         <input type="text" data-key="${k}" value="" />
       </div>
     `).join('')}
-    <button class="btn small danger" onclick="this.closest('.item-row').remove()" title="حذف">🗑</button>
+    <div class="reorder-btns">
+      <button class="btn small" onclick="moveItem(${idx}, -1)" title="نقل لأعلى">⬆️</button>
+      <button class="btn small" onclick="moveItem(${idx}, 1)" title="نقل لأسفل" disabled>⬇️</button>
+    </div>
+    <button class="btn small danger" onclick="removeItem(${idx})" title="حذف">🗑</button>
   `;
   itemsWrap.appendChild(row);
+  reindexItemRows();
 }
 
 function removeItem(idx) {
   const row = document.querySelector(`.item-row[data-idx="${idx}"]`);
   if (row) row.remove();
+  reindexItemRows();
+}
+
+function moveItem(idx, dir) {
+  const itemsWrap = document.getElementById('itemsWrap');
+  const rows = Array.from(itemsWrap.querySelectorAll('.item-row'));
+  const targetIdx = idx + dir;
+  if (targetIdx < 0 || targetIdx >= rows.length) return;
+
+  const row = rows[idx];
+  const targetRow = rows[targetIdx];
+
+  if (dir === -1) {
+    itemsWrap.insertBefore(row, targetRow);
+  } else {
+    itemsWrap.insertBefore(targetRow, row);
+  }
+
+  // إعادة ترقيم وضبط أزرار التعطيل بعد النقل
+  reindexItemRows();
+}
+
+function reindexItemRows() {
+  const itemsWrap = document.getElementById('itemsWrap');
+  const rows = Array.from(itemsWrap.querySelectorAll('.item-row'));
+  rows.forEach((row, i) => {
+    row.dataset.idx = i;
+    const upBtn = row.querySelector('.reorder-btns button:nth-child(1)');
+    const downBtn = row.querySelector('.reorder-btns button:nth-child(2)');
+    if (upBtn) {
+      upBtn.setAttribute('onclick', `moveItem(${i}, -1)`);
+      upBtn.disabled = (i === 0);
+    }
+    if (downBtn) {
+      downBtn.setAttribute('onclick', `moveItem(${i}, 1)`);
+      downBtn.disabled = (i === rows.length - 1);
+    }
+    const delBtn = row.querySelector('.btn.small.danger');
+    if (delBtn) delBtn.setAttribute('onclick', `removeItem(${i})`);
+  });
 }
 
 async function saveItems(tabId) {
