@@ -1,0 +1,1401 @@
+{
+  "tabsConfig": [
+    {
+      "id": "itunes",
+      "label": "🍎 iTunes",
+      "icon": "<img src=\"https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-84,h-23,c-at_least/storage/card-categories/a634bf28ac1c2af14d24ef545123f77b-1695199694.webp\" alt=\"iTunes\" style=\"width:133px;height:133px;object-fit:contain;\" />"
+    },
+    {
+      "id": "freefire",
+      "label": "🔥 فري فاير",
+      "icon": "<img src=\"https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-159,h-23,c-at_least/storage/card-categories/470118d7c59eff087dae0d80449a3c17-1730885495.webp\" alt=\"FreeFire\" style=\"width:133px;height:133px;object-fit:contain;\" />"
+    },
+    {
+      "id": "jawaker",
+      "label": "💎 جواكر",
+      "icon": "<img src=\"https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-116,h-20,c-at_least/storage/card-categories/d9255800c517875822e36d7b527f437a-1730884583.webp\" alt=\"Jawaker\" style=\"width:133px;height:133px;object-fit:contain;\" />"
+    },
+    {
+      "id": "pubg",
+      "label": "🔫 PUBG",
+      "icon": "<img src=\"https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-145,h-23,c-at_least/storage/card-categories/30628a19dbb82d596187e8f689aa3e02-1788438486.webp\" alt=\"PUBG\" style=\"width:133px;height:133px;object-fit:contain;\" />"
+    },
+    {
+      "id": "hiya",
+      "label": "💬 هاياشات",
+      "icon": "<img src=\"https://cdn.salla.sa/ynzrO/ILOIuS3KP4IMTpVLuovlX9XWP3a9TnZv1SeUVQ1x.png\" alt=\"Hiya Chat\" style=\"width:133px;height:133px;object-fit:contain;\" />"
+    },
+    {
+      "id": "bigo",
+      "label": "📺 BIGO",
+      "icon": "<img src=\"https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-170,h-46,c-at_least/storage/card-categories/fc7a1e0d6b1fba9c983c53188bfaedcf-1731415367.webp\" alt=\"Bigo\" style=\"width:133px;height:133px;object-fit:contain;\" />"
+    },
+    {
+      "id": "vn",
+      "label": "🔫 PUBG VN",
+      "icon": "<img src=\"https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-150,h-23,c-at_least/storage/card-categories/557c448281d09cf595c549c120affa9a-1695199790.webp\" alt=\"PUBG VN\" style=\"width:133px;height:133px;object-fit:contain;\" />"
+    },
+    {
+      "id": "tango",
+      "label": "💃 TANGO",
+      "icon": "<img src=\"https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-95,h-23,c-at_least/storage/card-categories/06823ad9fe4c1a4588a5a97f51528a7b-1715778871.webp\" alt=\"Tango\" style=\"width:133px;height:133px;object-fit:contain;\" />"
+    },
+    {
+      "id": "playstation",
+      "label": "🎮 PlayStation",
+      "icon": "<img src=\"https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-153,h-23,c-at_least/storage/card-categories/f12acd154ac477481e3b541e60e165d1-1713787750.webp\" alt=\"PlayStation\" style=\"width:133px;height:133px;object-fit:contain;\" />"
+    },
+    {
+      "id": "razer",
+      "label": "🐍 Razer",
+      "icon": "<img src=\"https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-92,h-23,c-at_least/storage/card-categories/6f118cceb709279eb6989eb39bd1ac40-1695200444.webp\" alt=\"Razer\" style=\"width:133px;height:133px;object-fit:contain;\" />"
+    },
+    {
+      "id": "nintendo",
+      "label": "🎮 Nintendo",
+      "icon": "<img src=\"https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-103,h-23,c-at_least/storage/card-categories/65bc65ca141ce4becd1dc5edec875875-1695202173.webp\" alt=\"Nintendo\" style=\"width:133px;height:133px;object-fit:contain;\" />"
+    },
+    {
+      "id": "xbox",
+      "label": "🎮 Xbox",
+      "icon": "<img src=\"https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-136,h-23,c-at_least/storage/card-categories/30fefb9553dd594ffbe253fd85490de8-1695200337.webp\" alt=\"Xbox\" style=\"width:133px;height:133px;object-fit:contain;\" />"
+    },
+    {
+      "id": "xboxuae",
+      "label": "🎮 Xbox UAE",
+      "icon": "<img src=\"https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-136,h-23,c-at_least/storage/card-categories/30fefb9553dd594ffbe253fd85490de8-1695200337.webp\" alt=\"Xbox UAE\" style=\"width:133px;height:133px;object-fit:contain;\" />"
+    },
+    {
+      "id": "steam",
+      "label": "🎮 Steam",
+      "icon": "<img src=\"https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-120,h-23,c-at_least/storage/card-categories/5d6b4e4b3dc5bbec7fa8ed346d2a725a-1695199384.webp\" alt=\"Steam\" style=\"width:133px;height:133px;object-fit:contain;\" />"
+    },
+    {
+      "id": "saudisteam",
+      "label": "🇸🇦 Steam KSA",
+      "icon": "<img src=\"https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-120,h-23,c-at_least/storage/card-categories/5d6b4e4b3dc5bbec7fa8ed346d2a725a-1695199384.webp\" alt=\"Steam KSA\" style=\"width:133px;height:133px;object-fit:contain;\" />"
+    },
+    {
+      "id": "roblox",
+      "label": "🤖 Roblox",
+      "icon": "<img src=\"https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-117,h-23,c-at_least/storage/card-categories/27f6dc58ed88faecbc10e551230110c7-1695199878.webp\" alt=\"Roblox\" style=\"width:133px;height:133px;object-fit:contain;\" />"
+    },
+    {
+      "id": "yaahlan",
+      "label": "🪙 Yaahlan",
+      "icon": "<img src=\"https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-86,h-23,c-at_least/storage/flags/1c457e41d350751b74216be1fe1fd60a-1781549067.webp\" alt=\"Yaahlan\" style=\"width:133px;height:133px;object-fit:contain;\" />"
+    },
+    {
+      "id": "layla",
+      "label": "💬 LAYLA",
+      "icon": "<img src=\"https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-74,h-23,c-at_least/storage/flags/bebcfa19a87f8accd47bab3bf83ed815-1741129398.webp\" alt=\"Layla\" style=\"width:133px;height:133px;object-fit:contain;\" />"
+    },
+    {
+      "id": "tiktok",
+      "label": "🎵 TikTok",
+      "icon": "<img src=\"https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-103,h-23,c-at_least/storage/flags/49881ca8ab2b6d821a7e8f9a01990c0c-1775403941.webp\" alt=\"TikTok\" style=\"width:133px;height:133px;object-fit:contain;\" />"
+    },
+    {
+      "id": "googleplay",
+      "label": "▶️ Google Play",
+      "icon": "<img src=\"https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-117,h-23,c-at_least/storage/card-categories/318f01dfbc60ebcc251ee3fc9fd720ca-1695199765.webp\" alt=\"Google Play\" style=\"width:133px;height:133px;object-fit:contain;\" />"
+    },
+    {
+      "id": "mlbb",
+      "label": "⚔️ Mobile Legends",
+      "icon": "<img src=\"https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-170,h-46,c-at_least/storage/card-categories/3c20d9bd2115f11280ab981c78923c20-1682240806.webp\" alt=\"Mobile Legends\" style=\"width:133px;height:133px;object-fit:contain;\" />"
+    },
+    {
+      "id": "netflix",
+      "label": "🎬 Netflix",
+      "icon": "<img src=\"https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-120,h-23,c-at_least/storage/card-categories/e791cb915481b57d3759aeb0b7bc8cfb-1695200180.webp\" alt=\"Netflix\" style=\"width:133px;height:133px;object-fit:contain;\" />"
+    },
+    {
+      "id": "arenabreakout",
+      "label": "🔫 Arena Breakout",
+      "icon": "<img src=\"https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-117,h-23,c-at_least/storage/card-categories/50fe8c48d496cc998350bef7e0e70e57-1715417932.webp\" alt=\"Arena Breakout\" style=\"width:133px;height:133px;object-fit:contain;\" />"
+    },
+    {
+      "id": "yallaludo",
+      "label": "💎 Yalla Ludo",
+      "icon": "<img src=\"https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-162,h-23,c-at_least/storage/card-categories/20c3726485a8f4c6f9b0dc90a36a7ef8-1709026766.webp\" alt=\"Yalla Ludo\" style=\"width:133px;height:133px;object-fit:contain;\" />"
+    },
+    {
+      "id": "eightball",
+      "label": "🎱 8 Ball Pool",
+      "icon": "<img src=\"https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-94,h-23,c-at_least/storage/flags/5840a4477ac496573a2ad92bd226d1c7-1682585116.webp\" alt=\"8Ball Pool\" style=\"width:133px;height:133px;object-fit:contain;\" />"
+    },
+    {
+      "id": "clashofclans",
+      "label": "🏰 Clash of Clans",
+      "icon": "<img src=\"https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-170,h-46,c-at_least/storage/card-categories/a6446faec16e449b0aad65e069ba9dec-1684845028.webp\" alt=\"Clash of Clans\" style=\"width:133px;height:133px;object-fit:contain;\" />"
+    },
+    {
+      "id": "snapchat",
+      "label": "👻 Snapchat",
+      "icon": "<img src=\"https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-69,h-23,c-at_least/storage/flags/1999bd68a937012535b617efe783a0f9-1741129043.webp\" alt=\"Snapchat\" style=\"width:133px;height:133px;object-fit:contain;\" />"
+    },
+    {
+      "id": "discord",
+      "label": "🎮 Discord",
+      "icon": "<img src=\"https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-170,h-46,c-at_least/storage/card-categories/5661c4cb5073329b9b3e9678392f9e92-1716020426.webp\" alt=\"Discord\" style=\"width:133px;height:133px;object-fit:contain;\" />"
+    },
+    {
+      "id": "fcmobile",
+      "label": "⚽ FC Mobile",
+      "icon": "<img src=\"https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-170,h-46,c-at_least/storage/flags/633f1af794dde985f9ffbec1b38a2251-1731322565.webp\" alt=\"FC Mobile\" style=\"width:133px;height:133px;object-fit:contain;\" />"
+    },
+    {
+      "id": "minecraft",
+      "label": "⛏️ Minecraft",
+      "icon": "<img src=\"https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-98,h-23,c-at_least/storage/card-categories/4e6307ca0931b629b5985a65343cd04d-1695203235.webp\" alt=\"Minecraft\" style=\"width:133px;height:133px;object-fit:contain;\" />"
+    }
+  ],
+  "products": {
+    "itunes": [
+      {
+        "shekel": "شيكل 18",
+        "usd": "دولار 5",
+        "label": ""
+      },
+      {
+        "shekel": "شيكل 32",
+        "usd": "دولار 10",
+        "label": ""
+      },
+      {
+        "shekel": "شيكل 50",
+        "usd": "دولار 15",
+        "label": ""
+      },
+      {
+        "shekel": "شيكل 66",
+        "usd": "دولار 20",
+        "label": ""
+      },
+      {
+        "shekel": "شيكل 85",
+        "usd": "دولار 25",
+        "label": ""
+      },
+      {
+        "shekel": "شيكل 105",
+        "usd": "دولار 30",
+        "label": ""
+      },
+      {
+        "shekel": "شيكل 132",
+        "usd": "دولار 40",
+        "label": ""
+      },
+      {
+        "shekel": "شيكل 165",
+        "usd": "دولار 50",
+        "label": ""
+      },
+      {
+        "shekel": "شيكل 200",
+        "usd": "دولار 60",
+        "label": ""
+      },
+      {
+        "shekel": "شيكل 224",
+        "usd": "دولار 70",
+        "label": ""
+      },
+      {
+        "shekel": "شيكل 318",
+        "usd": "دولار 100",
+        "label": ""
+      },
+      {
+        "shekel": "شيكل 482",
+        "usd": "دولار 150",
+        "label": ""
+      },
+      {
+        "shekel": "شيكل 635",
+        "usd": "دولار 200",
+        "label": ""
+      },
+      {
+        "shekel": "شيكل 952",
+        "usd": "دولار 300",
+        "label": ""
+      },
+      {
+        "shekel": "شيكل 1587",
+        "usd": "دولار 500",
+        "label": ""
+      }
+    ],
+    "freefire": [
+      {
+        "diamonds": "💎 100+10",
+        "shekel": "شيكل 5",
+        "label": "جواهر + هدية"
+      },
+      {
+        "diamonds": "💎 210+21",
+        "shekel": "شيكل 9",
+        "label": "جواهر + هدية"
+      },
+      {
+        "diamonds": "💎 530+53",
+        "shekel": "شيكل 18",
+        "label": "جواهر + هدية"
+      },
+      {
+        "diamonds": "💎 1080+108",
+        "shekel": "شيكل 35",
+        "label": "جواهر + هدية"
+      },
+      {
+        "diamonds": "💎 2200+220",
+        "shekel": "شيكل 68",
+        "label": "جواهر + هدية"
+      }
+    ],
+    "jawaker": [
+      {
+        "tokens": "Token 10,000",
+        "shekel": "شيكل 5",
+        "label": ""
+      },
+      {
+        "tokens": "Token 15,000",
+        "shekel": "شيكل 8",
+        "label": ""
+      },
+      {
+        "tokens": "Token 35,000",
+        "shekel": "شيكل 18",
+        "label": ""
+      },
+      {
+        "tokens": "Token 70,000",
+        "shekel": "شيكل 32",
+        "label": ""
+      },
+      {
+        "tokens": "Token 95,000",
+        "shekel": "شيكل 45",
+        "label": ""
+      },
+      {
+        "tokens": "Token 150,000",
+        "shekel": "شيكل 62",
+        "label": ""
+      },
+      {
+        "tokens": "Token 230,000",
+        "shekel": "شيكل 94",
+        "label": ""
+      },
+      {
+        "tokens": "Token 400,000",
+        "shekel": "شيكل 155",
+        "label": ""
+      },
+      {
+        "tokens": "⭐ 52,500",
+        "shekel": "شيكل 202",
+        "label": "باقة مميزة"
+      },
+      {
+        "tokens": "⭐ 805,000",
+        "shekel": "شيكل 310",
+        "label": "باقة مميزة"
+      },
+      {
+        "tokens": "⭐ 1,000,000",
+        "shekel": "شيكل 380",
+        "label": "باقة مميزة"
+      }
+    ],
+    "pubg": [
+      {
+        "uc": "60 UC",
+        "shekel": "شيكل 4",
+        "label": ""
+      },
+      {
+        "uc": "120 UC",
+        "shekel": "شيكل 7",
+        "label": ""
+      },
+      {
+        "uc": "240 UC",
+        "shekel": "شيكل 14",
+        "label": ""
+      },
+      {
+        "uc": "300 + 25 UC",
+        "shekel": "شيكل 17",
+        "label": ""
+      },
+      {
+        "uc": "660 UC",
+        "shekel": "شيكل 32",
+        "label": ""
+      },
+      {
+        "uc": "720 UC",
+        "shekel": "شيكل 36",
+        "label": ""
+      },
+      {
+        "uc": "1800 UC",
+        "shekel": "شيكل 77",
+        "label": ""
+      },
+      {
+        "uc": "2175 UC",
+        "shekel": "شيكل 95",
+        "label": ""
+      },
+      {
+        "uc": "3000 + 850 UC",
+        "shekel": "شيكل 150",
+        "label": "باقة مميزة"
+      },
+      {
+        "uc": "4105 UC",
+        "shekel": "شيكل 170",
+        "label": "باقة مميزة"
+      },
+      {
+        "uc": "8100 UC",
+        "shekel": "شيكل 305",
+        "label": "باقة مميزة"
+      },
+      {
+        "uc": "9900 UC",
+        "shekel": "شيكل 380",
+        "label": "باقة مميزة"
+      },
+      {
+        "uc": "13750 UC",
+        "shekel": "شيكل 525",
+        "label": "باقة مميزة"
+      },
+      {
+        "uc": "16200 UC",
+        "shekel": "شيكل 602",
+        "label": "باقة مميزة"
+      },
+      {
+        "uc": "24300 UC",
+        "shekel": "شيكل 890",
+        "label": "باقة مميزة"
+      },
+      {
+        "uc": "32400 UC",
+        "shekel": "شيكل 1195",
+        "label": "باقة مميزة"
+      },
+      {
+        "uc": "40500 UC",
+        "shekel": "شيكل 1500",
+        "label": "باقة مميزة"
+      }
+    ],
+    "hiya": [
+      {
+        "coins": "1,800",
+        "shekel": "شيكل 10",
+        "label": "عملات هاياشات"
+      },
+      {
+        "coins": "4,100",
+        "shekel": "شيكل 20",
+        "label": "عملات هاياشات"
+      },
+      {
+        "coins": "6,100",
+        "shekel": "شيكل 30",
+        "label": "عملات هاياشات"
+      },
+      {
+        "coins": "9,000",
+        "shekel": "شيكل 40",
+        "label": "عملات هاياشات"
+      },
+      {
+        "coins": "11,500",
+        "shekel": "شيكل 50",
+        "label": "عملات هاياشات"
+      },
+      {
+        "coins": "24,000",
+        "shekel": "شيكل 100",
+        "label": "عملات هاياشات"
+      }
+    ],
+    "bigo": [
+      {
+        "diamonds": "💎 120",
+        "shekel": "شيكل 9",
+        "label": ""
+      },
+      {
+        "diamonds": "💎 200",
+        "shekel": "شيكل 17",
+        "label": ""
+      },
+      {
+        "diamonds": "💎 400",
+        "shekel": "شيكل 30",
+        "label": ""
+      },
+      {
+        "diamonds": "💎 600",
+        "shekel": "شيكل 45",
+        "label": ""
+      },
+      {
+        "diamonds": "💎 800",
+        "shekel": "شيكل 58",
+        "label": ""
+      },
+      {
+        "diamonds": "💎 1,000",
+        "shekel": "شيكل 70",
+        "label": ""
+      },
+      {
+        "diamonds": "💎 2,000",
+        "shekel": "شيكل 140",
+        "label": ""
+      },
+      {
+        "diamonds": "💎 3,000",
+        "shekel": "شيكل 205",
+        "label": ""
+      },
+      {
+        "diamonds": "💎 4,000",
+        "shekel": "شيكل 272",
+        "label": ""
+      },
+      {
+        "diamonds": "💎 8,000",
+        "shekel": "شيكل 540",
+        "label": ""
+      },
+      {
+        "diamonds": "💎 10,000",
+        "shekel": "شيكل 670",
+        "label": ""
+      },
+      {
+        "diamonds": "💎 12,000",
+        "shekel": "شيكل 800",
+        "label": ""
+      },
+      {
+        "diamonds": "💎 20,000",
+        "shekel": "شيكل 1320",
+        "label": ""
+      }
+    ],
+    "vn": [
+      {
+        "coins": "UC 60+",
+        "shekel": "شيكل 5",
+        "label": "بيجی فیتنامی"
+      },
+      {
+        "coins": "UC 140+",
+        "shekel": "شيكل 11",
+        "label": "بيجی فیتنامی"
+      },
+      {
+        "coins": "UC 300+",
+        "shekel": "شيكل 20",
+        "label": "بيجی فیتنامی"
+      },
+      {
+        "coins": "UC 600+",
+        "shekel": "شيكل 33",
+        "label": "بيجی فیتنامی"
+      },
+      {
+        "coins": "UC 1,500+",
+        "shekel": "شيكل 80",
+        "label": "بيجی فیتنامی"
+      },
+      {
+        "coins": "UC 3,000+",
+        "shekel": "شيكل 158",
+        "label": "بيجی فیتنامی"
+      }
+    ],
+    "tango": [
+      {
+        "coins": "COIN 250",
+        "shekel": "شيكل 10",
+        "label": "عملات تانجو"
+      },
+      {
+        "coins": "COIN 600",
+        "shekel": "شيكل 20",
+        "label": "عملات تانجو"
+      },
+      {
+        "coins": "COIN 1,000",
+        "shekel": "شيكل 25",
+        "label": "عملات تانجو"
+      },
+      {
+        "coins": "COIN 1,200",
+        "shekel": "شيكل 30",
+        "label": "عملات تانجو"
+      },
+      {
+        "coins": "COIN 2,600",
+        "shekel": "شيكل 60",
+        "label": "عملات تانجو"
+      },
+      {
+        "coins": "COIN 3,750",
+        "shekel": "شيكل 80",
+        "label": "عملات تانجو"
+      },
+      {
+        "coins": "COIN 7,500",
+        "shekel": "شيكل 158",
+        "label": "عملات تانجو"
+      },
+      {
+        "coins": "COIN 15,000",
+        "shekel": "شيكل 320",
+        "label": "عملات تانجو"
+      },
+      {
+        "coins": "COIN 30,000",
+        "shekel": "شيكل 630",
+        "label": "عملات تانجو"
+      },
+      {
+        "coins": "COIN 37,500",
+        "shekel": "شيكل 760",
+        "label": "عملات تانجو"
+      }
+    ],
+    "playstation": [
+      {
+        "region": "🇺🇸 أمريكي",
+        "amount": "$10",
+        "shekel": "شيكل 35",
+        "label": "PlayStation Store"
+      },
+      {
+        "region": "🇺🇸 أمريكي",
+        "amount": "$25",
+        "shekel": "شيكل 82",
+        "label": "PlayStation Store"
+      },
+      {
+        "region": "🇺🇸 أمريكي",
+        "amount": "$50",
+        "shekel": "شيكل 162",
+        "label": "PlayStation Store"
+      },
+      {
+        "region": "🇺🇸 أمريكي",
+        "amount": "$75",
+        "shekel": "شيكل 250",
+        "label": "PlayStation Store"
+      },
+      {
+        "region": "🇺🇸 أمريكي",
+        "amount": "$100",
+        "shekel": "شيكل 320",
+        "label": "PlayStation Store"
+      },
+      {
+        "region": "🇸🇦 سعودي",
+        "amount": "$10",
+        "shekel": "شيكل 36",
+        "label": "بطاقة سعودية"
+      },
+      {
+        "region": "🇸🇦 سعودي",
+        "amount": "$20",
+        "shekel": "شيكل 71",
+        "label": "بطاقة سعودية"
+      },
+      {
+        "region": "🇸🇦 سعودي",
+        "amount": "$50",
+        "shekel": "شيكل 176",
+        "label": "بطاقة سعودية"
+      },
+      {
+        "region": "🇸🇦 سعودي",
+        "amount": "$70",
+        "shekel": "شيكل 242",
+        "label": "بطاقة سعودية"
+      },
+      {
+        "region": "🇸🇦 سعودي",
+        "amount": "$100",
+        "shekel": "شيكل 340",
+        "label": "بطاقة سعودية"
+      },
+      {
+        "region": "🇦🇪 إماراتي",
+        "amount": "$10",
+        "shekel": "شيكل 38",
+        "label": "بطاقة اماراتية"
+      },
+      {
+        "region": "🇦🇪 إماراتي",
+        "amount": "$20",
+        "shekel": "شيكل 70",
+        "label": "بطاقة اماراتية"
+      },
+      {
+        "region": "🇦🇪 إماراتي",
+        "amount": "$50",
+        "shekel": "شيكل 165",
+        "label": "بطاقة اماراتية"
+      },
+      {
+        "region": "🇦🇪 إماراتي",
+        "amount": "$100",
+        "shekel": "شيكل 320",
+        "label": "بطاقة اماراتية"
+      }
+    ],
+    "razer": [
+      {
+        "amount": "$5",
+        "shekel": "شيكل 18",
+        "label": "Razer Gold Global"
+      },
+      {
+        "amount": "$10",
+        "shekel": "شيكل 34",
+        "label": "Razer Gold Global"
+      },
+      {
+        "amount": "$20",
+        "shekel": "شيكل 68",
+        "label": "Razer Gold Global"
+      },
+      {
+        "amount": "$50",
+        "shekel": "شيكل 168",
+        "label": "Razer Gold Global"
+      },
+      {
+        "amount": "$100",
+        "shekel": "شيكل 330",
+        "label": "Razer Gold Global"
+      },
+      {
+        "amount": "$200",
+        "shekel": "شيكل 655",
+        "label": "Razer Gold Global"
+      }
+    ],
+    "nintendo": [
+      {
+        "type": "🎮 eShop",
+        "amount": "$10",
+        "shekel": "شيكل 32",
+        "label": "Nintendo US"
+      },
+      {
+        "type": "🎮 eShop",
+        "amount": "$20",
+        "shekel": "شيكل 64",
+        "label": "Nintendo US"
+      },
+      {
+        "type": "🎮 eShop",
+        "amount": "$35",
+        "shekel": "شيكل 113",
+        "label": "Nintendo US"
+      },
+      {
+        "type": "🎮 eShop",
+        "amount": "$50",
+        "shekel": "شيكل 160",
+        "label": "Nintendo US"
+      },
+      {
+        "type": "⭐ Membership",
+        "amount": "3 Month",
+        "shekel": "شيكل 32",
+        "label": "Nintendo Membership"
+      },
+      {
+        "type": "⭐ Membership",
+        "amount": "12 Month",
+        "shekel": "شيكل 74",
+        "label": "Nintendo Membership"
+      }
+    ],
+    "xbox": [
+      {
+        "amount": "$5",
+        "shekel": "شيكل 20",
+        "label": "Xbox Gift Card USA"
+      },
+      {
+        "amount": "$10",
+        "shekel": "شيكل 34",
+        "label": "Xbox Gift Card USA"
+      },
+      {
+        "amount": "$15",
+        "shekel": "شيكل 52",
+        "label": "Xbox Gift Card USA"
+      },
+      {
+        "amount": "$20",
+        "shekel": "شيكل 68",
+        "label": "Xbox Gift Card USA"
+      },
+      {
+        "amount": "$25",
+        "shekel": "شيكل 85",
+        "label": "Xbox Gift Card USA"
+      },
+      {
+        "amount": "$50",
+        "shekel": "شيكل 165",
+        "label": "Xbox Gift Card USA"
+      },
+      {
+        "amount": "$100",
+        "shekel": "شيكل 320",
+        "label": "Xbox Gift Card USA"
+      },
+      {
+        "amount": "🎮 Game Pass",
+        "shekel": "شيكل 70",
+        "label": "Xbox Game Pass Ultimate US – 1"
+      },
+      {
+        "amount": "🎮 Game Pass",
+        "shekel": "شيكل 200",
+        "label": "Xbox Game Pass Ultimate US – 3"
+      }
+    ],
+    "xboxuae": [
+      {
+        "amount": "AED 59",
+        "shekel": "60",
+        "label": "Xbox Gift Card UAE"
+      },
+      {
+        "amount": "AED 99",
+        "shekel": "100",
+        "label": "Xbox Gift Card UAE"
+      },
+      {
+        "amount": "AED 199",
+        "shekel": "200",
+        "label": "Xbox Gift Card UAE"
+      }
+    ],
+    "steam": [
+      {
+        "region": "🇺🇸 أمريكي",
+        "amount": "$5",
+        "shekel": "شيكل 18",
+        "label": "Steam Gift Card"
+      },
+      {
+        "region": "🇺🇸 أمريكي",
+        "amount": "$10",
+        "shekel": "شيكل 45",
+        "label": "Steam Gift Card"
+      },
+      {
+        "region": "🇺🇸 أمريكي",
+        "amount": "$20",
+        "shekel": "شيكل 80",
+        "label": "Steam Gift Card"
+      },
+      {
+        "region": "🇺🇸 أمريكي",
+        "amount": "$50",
+        "shekel": "شيكل 180",
+        "label": "Steam Gift Card"
+      },
+      {
+        "region": "🇺🇸 أمريكي",
+        "amount": "$100",
+        "shekel": "شيكل 350",
+        "label": "Steam Gift Card"
+      },
+      {
+        "region": "🇦🇪 إماراتي",
+        "amount": "AED 20",
+        "shekel": "شيكل 25",
+        "label": "Steam Wallet Card UAE"
+      },
+      {
+        "region": "🇦🇪 إماراتي",
+        "amount": "AED 50",
+        "shekel": "شيكل 55",
+        "label": "Steam Wallet Card UAE"
+      },
+      {
+        "region": "🇦🇪 إماراتي",
+        "amount": "AED 100",
+        "shekel": "شيكل 105",
+        "label": "Steam Wallet Card UAE"
+      },
+      {
+        "region": "🇦🇪 إماراتي",
+        "amount": "AED 200",
+        "shekel": "شيكل 205",
+        "label": "Steam Wallet Card UAE"
+      },
+      {
+        "region": "🇦🇪 إماراتي",
+        "amount": "AED 400",
+        "shekel": "شيكل 400",
+        "label": "Steam Wallet Card UAE"
+      }
+    ],
+    "saudisteam": [
+      {
+        "region": "🇸🇦 سعودي",
+        "amount": "SAR 20",
+        "shekel": "شيكل 22",
+        "label": "Steam Saudi"
+      },
+      {
+        "region": "🇸🇦 سعودي",
+        "amount": "SAR 50",
+        "shekel": "شيكل 51",
+        "label": "Steam Saudi"
+      },
+      {
+        "region": "🇸🇦 سعودي",
+        "amount": "SAR 100",
+        "shekel": "شيكل 100",
+        "label": "Steam Saudi"
+      },
+      {
+        "region": "🇸🇦 سعودي",
+        "amount": "SAR 200",
+        "shekel": "شيكل 200",
+        "label": "Steam Saudi"
+      },
+      {
+        "region": "🇸🇦 سعودي",
+        "amount": "SAR 400",
+        "shekel": "شيكل 400",
+        "label": "Steam Saudi"
+      }
+    ],
+    "roblox": [
+      {
+        "region": "🇺🇸 أمريكي",
+        "amount": "$5",
+        "shekel": "شيكل 20",
+        "label": "Roblox Gift Card"
+      },
+      {
+        "region": "🇺🇸 أمريكي",
+        "amount": "$10",
+        "shekel": "شيكل 33",
+        "label": "Roblox Gift Card"
+      },
+      {
+        "region": "🇺🇸 أمريكي",
+        "amount": "$25",
+        "shekel": "شيكل 82",
+        "label": "Roblox Gift Card"
+      },
+      {
+        "region": "🇺🇸 أمريكي",
+        "amount": "$50",
+        "shekel": "شيكل 155",
+        "label": "Roblox Gift Card"
+      },
+      {
+        "region": "🇺🇸 أمريكي",
+        "amount": "$100",
+        "shekel": "شيكل 315",
+        "label": "Roblox Gift Card"
+      },
+      {
+        "region": "KSA",
+        "amount": "SAR 20",
+        "shekel": "شيكل 21",
+        "label": "Roblox KSA"
+      },
+      {
+        "region": "KSA",
+        "amount": "SAR 50",
+        "shekel": "شيكل 46",
+        "label": "Roblox KSA"
+      },
+      {
+        "region": "KSA",
+        "amount": "SAR 100",
+        "shekel": "شيكل 83",
+        "label": "Roblox KSA"
+      },
+      {
+        "region": "KSA",
+        "amount": "SAR 200",
+        "shekel": "شيكل 162",
+        "label": "Roblox KSA"
+      },
+      {
+        "region": "KSA",
+        "amount": "SAR 500",
+        "shekel": "شيكل 407",
+        "label": "Roblox KSA"
+      },
+      {
+        "region": "AED",
+        "amount": "AED 20",
+        "shekel": "شيكل 21",
+        "label": "Roblox UAE"
+      },
+      {
+        "region": "AED",
+        "amount": "AED 50",
+        "shekel": "شيكل 46",
+        "label": "Roblox UAE"
+      },
+      {
+        "region": "AED",
+        "amount": "AED 100",
+        "shekel": "شيكل 85",
+        "label": "Roblox UAE"
+      },
+      {
+        "region": "AED",
+        "amount": "AED 200",
+        "shekel": "شيكل 164",
+        "label": "Roblox UAE"
+      },
+      {
+        "region": "AED",
+        "amount": "AED 500",
+        "shekel": "شيكل 407",
+        "label": "Roblox UAE"
+      }
+    ],
+    "yaahlan": [
+      {
+        "amount": "1,000",
+        "shekel": "شيكل 9",
+        "label": "Yaahlan"
+      },
+      {
+        "amount": "2,000",
+        "shekel": "شيكل 16",
+        "label": "Yaahlan"
+      },
+      {
+        "amount": "5,000",
+        "shekel": "شيكل 37",
+        "label": "Yaahlan"
+      }
+    ],
+    "layla": [
+      {
+        "coins": "Coin 10,000",
+        "shekel": "شيكل 15",
+        "label": "Layla Chat"
+      },
+      {
+        "coins": "Coin 15,000",
+        "shekel": "شيكل 20",
+        "label": "Layla Chat"
+      },
+      {
+        "coins": "Coin 20,000",
+        "shekel": "شيكل 30",
+        "label": "Layla Chat"
+      },
+      {
+        "coins": "Coin 30,000",
+        "shekel": "شيكل 40",
+        "label": "Layla Chat"
+      },
+      {
+        "coins": "Coin 50,000",
+        "shekel": "شيكل 65",
+        "label": "Layla Chat"
+      },
+      {
+        "coins": "Coin 80,000",
+        "shekel": "شيكل 100",
+        "label": "Layla Chat"
+      },
+      {
+        "coins": "Coin 100,000",
+        "shekel": "شيكل 115",
+        "label": "Layla Chat"
+      }
+    ],
+    "tiktok": [
+      {
+        "coins": "🎵 500 Coins",
+        "shekel": "شيكل 23",
+        "label": "TikTok Coins"
+      },
+      {
+        "coins": "🎵 700 Coins",
+        "shekel": "شيكل 30",
+        "label": "TikTok Coins"
+      },
+      {
+        "coins": "🎵 1,000 Coins",
+        "shekel": "شيكل 47",
+        "label": "TikTok Coins"
+      },
+      {
+        "coins": "🎵 1,400 Coins",
+        "shekel": "شيكل 59",
+        "label": "TikTok Coins"
+      },
+      {
+        "coins": "🎵 2,100 Coins",
+        "shekel": "شيكل 89",
+        "label": "TikTok Coins"
+      },
+      {
+        "coins": "🎵 3,500 Coins",
+        "shekel": "شيكل 145",
+        "label": "TikTok Coins"
+      },
+      {
+        "coins": "🎵 5,000 Coins",
+        "shekel": "شيكل 220",
+        "label": "TikTok Coins"
+      },
+      {
+        "coins": "🎵 7,000 Coins",
+        "shekel": "شيكل 300",
+        "label": "TikTok Coins"
+      },
+      {
+        "coins": "🎵 10,000 Coins",
+        "shekel": "شيكل 390",
+        "label": "TikTok Coins"
+      },
+      {
+        "coins": "🎵 17,500 Coins",
+        "shekel": "شيكل 660",
+        "label": "TikTok Coins"
+      },
+      {
+        "coins": "🎵 35,000 Coins",
+        "shekel": "شيكل 1300",
+        "label": "TikTok Coins"
+      }
+    ],
+    "googleplay": [
+      {
+        "amount": "$5",
+        "shekel": "شيكل 18",
+        "label": "Google Play US"
+      },
+      {
+        "amount": "$10",
+        "shekel": "شيكل 35",
+        "label": "Google Play US"
+      },
+      {
+        "amount": "$15",
+        "shekel": "شيكل 51",
+        "label": "Google Play US"
+      },
+      {
+        "amount": "$25",
+        "shekel": "شيكل 85",
+        "label": "Google Play US"
+      },
+      {
+        "amount": "$50",
+        "shekel": "شيكل 165",
+        "label": "Google Play US"
+      },
+      {
+        "amount": "$100",
+        "shekel": "شيكل 335",
+        "label": "Google Play US"
+      }
+    ],
+    "mlbb": [
+      {
+        "diamonds": "💎 625+81",
+        "shekel": "شيكل 8",
+        "label": "Diamonds + Bonus"
+      },
+      {
+        "diamonds": "💎 1,860+335",
+        "shekel": "شيكل 32",
+        "label": "Diamonds + Bonus"
+      },
+      {
+        "diamonds": "💎 3,099+589",
+        "shekel": "شيكل 40",
+        "label": "Diamonds + Bonus"
+      },
+      {
+        "diamonds": "💎 7,740+1,548",
+        "shekel": "شيكل 115",
+        "label": "Diamonds + Bonus"
+      },
+      {
+        "diamonds": "💎 4,545",
+        "shekel": "شيكل 190",
+        "label": "Diamonds"
+      },
+      {
+        "diamonds": "💎 1,890",
+        "shekel": "شيكل 280",
+        "label": "Diamonds"
+      }
+    ],
+    "netflix": [
+      {
+        "amount": "$20",
+        "shekel": "شيكل 70",
+        "label": "Netflix US"
+      },
+      {
+        "amount": "$25",
+        "shekel": "شيكل 88",
+        "label": "Netflix US"
+      },
+      {
+        "amount": "$30",
+        "shekel": "شيكل 105",
+        "label": "Netflix US"
+      },
+      {
+        "amount": "$40",
+        "shekel": "شيكل 138",
+        "label": "Netflix US"
+      },
+      {
+        "amount": "$50",
+        "shekel": "شيكل 175",
+        "label": "Netflix US"
+      },
+      {
+        "amount": "$60",
+        "shekel": "شيكل 210",
+        "label": "Netflix US"
+      },
+      {
+        "amount": "$100",
+        "shekel": "شيكل 345",
+        "label": "Netflix US"
+      }
+    ],
+    "arenabreakout": [
+      {
+        "amount": "60",
+        "shekel": "شيكل 5",
+        "label": "Arena Breakout"
+      },
+      {
+        "amount": "310",
+        "shekel": "شيكل 17",
+        "label": "Arena Breakout"
+      },
+      {
+        "amount": "630",
+        "shekel": "شيكل 31",
+        "label": "Arena Breakout"
+      },
+      {
+        "amount": "1,580",
+        "shekel": "شيكل 80",
+        "label": "Arena Breakout"
+      },
+      {
+        "amount": "3,200",
+        "shekel": "شيكل 152",
+        "label": "Arena Breakout"
+      },
+      {
+        "amount": "6,500",
+        "shekel": "شيكل 295",
+        "label": "Arena Breakout"
+      }
+    ],
+    "yallaludo": [
+      {
+        "amount": "2,320 💎",
+        "shekel": "شيكل 18",
+        "label": "Yalla Ludo"
+      },
+      {
+        "amount": "5,150 💎",
+        "shekel": "شيكل 37",
+        "label": "Yalla Ludo"
+      },
+      {
+        "amount": "13,580 💎",
+        "shekel": "شيكل 81",
+        "label": "Yalla Ludo"
+      },
+      {
+        "amount": "55,800 💎",
+        "shekel": "شيكل 310",
+        "label": "Yalla Ludo"
+      }
+    ],
+    "eightball": [
+      {
+        "amount": "112K 🎱",
+        "shekel": "شيكل 10",
+        "label": "Ball Coins"
+      },
+      {
+        "amount": "256K 🎱",
+        "shekel": "شيكل 16",
+        "label": "Ball Coins"
+      },
+      {
+        "amount": "800K 🎱",
+        "shekel": "شيكل 38",
+        "label": "Ball Coins"
+      },
+      {
+        "amount": "2M 🎱",
+        "shekel": "شيكل 90",
+        "label": "Ball Coins"
+      }
+    ],
+    "clashofclans": [
+      {
+        "amount": "500 Gems",
+        "shekel": "شيكل 20",
+        "label": "Clash of Clans"
+      },
+      {
+        "amount": "1,200 Gems",
+        "shekel": "شيكل 35",
+        "label": "Clash of Clans"
+      },
+      {
+        "amount": "2,500 Gems",
+        "shekel": "شيكل 68",
+        "label": "Clash of Clans"
+      },
+      {
+        "amount": "6,500 Gems",
+        "shekel": "شيكل 165",
+        "label": "Clash of Clans"
+      }
+    ],
+    "snapchat": [
+      {
+        "amount": "Plus Monthly",
+        "shekel": "شيكل 20",
+        "label": "👻"
+      },
+      {
+        "amount": "Friends & Family",
+        "shekel": "شيكل 32",
+        "label": "👻"
+      },
+      {
+        "amount": "Plus Monthly",
+        "shekel": "شيكل 38",
+        "label": "👻"
+      },
+      {
+        "amount": "Platinum Monthly",
+        "shekel": "شيكل 60",
+        "label": "👻"
+      },
+      {
+        "amount": "Plus Annual",
+        "shekel": "شيكل 100",
+        "label": "👻"
+      }
+    ],
+    "discord": [
+      {
+        "amount": "Nitro Monthly",
+        "shekel": "شيكل 18",
+        "label": "🎮 Discord"
+      },
+      {
+        "amount": "Nitro Monthly",
+        "shekel": "شيكل 32",
+        "label": "🎮 Discord"
+      },
+      {
+        "amount": "Nitro Yearly",
+        "shekel": "شيكل 300",
+        "label": "🎮 Discord"
+      }
+    ],
+    "fcmobile": [
+      {
+        "amount": "40 FC",
+        "shekel": "شيكل 3",
+        "label": "FC Points"
+      },
+      {
+        "amount": "100 FC",
+        "shekel": "شيكل 5",
+        "label": "FC Points"
+      },
+      {
+        "amount": "520 FC",
+        "shekel": "شيكل 16",
+        "label": "FC Points"
+      },
+      {
+        "amount": "1,070 FC",
+        "shekel": "شيكل 36",
+        "label": "FC Points"
+      },
+      {
+        "amount": "2,200 FC",
+        "shekel": "شيكل 75",
+        "label": "FC Points"
+      },
+      {
+        "amount": "5,750 FC",
+        "shekel": "شيكل 190",
+        "label": "FC Points"
+      },
+      {
+        "amount": "12,000 FC",
+        "shekel": "شيكل 380",
+        "label": "FC Points"
+      }
+    ],
+    "minecraft": [
+      {
+        "amount": "1,720",
+        "shekel": "شيكل 35",
+        "label": "Minecoins"
+      },
+      {
+        "amount": "3,500",
+        "shekel": "شيكل 70",
+        "label": "Minecoins"
+      },
+      {
+        "amount": "8,800",
+        "shekel": "شيكل 175",
+        "label": "Minecoins"
+      }
+    ]
+  }
+}
