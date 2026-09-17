@@ -5,6 +5,32 @@ const crypto = require('crypto');
 const cors = require('cors');
 
 // ============================================================
+// قاعدة بيانات Postgres (اختياري) — إذا كان متغير البيئة DATABASE_URL
+// موجودًا، تُخزَّن الأسعار والطلبات في قاعدة بيانات Postgres بدلاً من
+// ملفات على القرص، فلا تُفقد أبدًا عند إعادة نشر الموقع على Render.
+// بدون DATABASE_URL، يعمل الموقع كالسابق بالحفظ في ملفات (data/products.json و orders.json).
+// ============================================================
+let pgPool = null;
+let dbReadyPromise = null;
+if (process.env.DATABASE_URL) {
+  const { Pool } = require('pg');
+  pgPool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
+  });
+  dbReadyPromise = pgPool.query(`
+    CREATE TABLE IF NOT EXISTS app_kv (
+      key TEXT PRIMARY KEY,
+      value JSONB NOT NULL
+    )
+  `).then(() => {
+    console.log('🗄️  متصل بقاعدة بيانات Postgres، سيتم حفظ الأسعار والطلبات فيها.');
+  }).catch(err => {
+    console.error('❌ فشل الاتصال بقاعدة بيانات Postgres:', err);
+  });
+}
+
+// ============================================================
 // بيانات افتراضية مدمجة داخل الكود (نسخة احتياطية ضمانية)
 // في حال لم يتم رفع ملف data/products.json بشكل صحيح على الاستضافة،
 // يستخدم الخادم هذه البيانات تلقائيًا حتى لا يبقى الموقع فارغًا أبدًا.
@@ -1484,10 +1510,43 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ============================================================
 // ملفات البيانات
 // ============================================================
-const ORDERS_FILE = path.join(__dirname, 'orders.json');
-const PRODUCTS_FILE = path.join(__dirname, 'data', 'products.json');
+// إذا تم إعداد قرص دائم (Persistent Disk) على Render وربطه عبر متغير البيئة DATA_DIR،
+// سيتم حفظ الطلبات والمنتجات هناك بحيث لا تُفقد عند كل عملية نشر (Deploy) جديدة.
+// بدون هذا المتغير، تُحفظ البيانات داخل مجلد المشروع كما كانت (قد تُفقد عند إعادة النشر على Render).
+const DATA_DIR = process.env.DATA_DIR || null;
+if (DATA_DIR) {
+  try {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  } catch (e) {
+    console.error('تعذر إنشاء مجلد البيانات (DATA_DIR):', e);
+  }
+}
+const ORDERS_FILE = DATA_DIR ? path.join(DATA_DIR, 'orders.json') : path.join(__dirname, 'orders.json');
+const PRODUCTS_FILE = DATA_DIR ? path.join(DATA_DIR, 'products.json') : path.join(__dirname, 'data', 'products.json');
 
-function readOrders() {
+async function dbGet(key, fallback) {
+  if (dbReadyPromise) await dbReadyPromise;
+  const result = await pgPool.query('SELECT value FROM app_kv WHERE key = $1', [key]);
+  if (result.rows.length === 0) {
+    await dbSet(key, fallback);
+    return fallback;
+  }
+  return result.rows[0].value;
+}
+
+async function dbSet(key, value) {
+  if (dbReadyPromise) await dbReadyPromise;
+  await pgPool.query(
+    `INSERT INTO app_kv (key, value) VALUES ($1, $2)
+     ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
+    [key, JSON.stringify(value)]
+  );
+}
+
+async function readOrders() {
+  if (pgPool) {
+    return await dbGet('orders', []);
+  }
   try {
     if (!fs.existsSync(ORDERS_FILE)) {
       fs.writeFileSync(ORDERS_FILE, JSON.stringify([]));
@@ -1501,7 +1560,10 @@ function readOrders() {
   }
 }
 
-function saveOrders(orders) {
+async function saveOrders(orders) {
+  if (pgPool) {
+    return await dbSet('orders', orders);
+  }
   try {
     fs.writeFileSync(ORDERS_FILE, JSON.stringify(orders, null, 2));
   } catch (error) {
@@ -1510,7 +1572,11 @@ function saveOrders(orders) {
   }
 }
 
-function readProducts() {
+async function readProducts() {
+  if (pgPool) {
+    return await dbGet('products', JSON.parse(JSON.stringify(DEFAULT_PRODUCTS_DATA)));
+  }
+
   let data = null;
 
   try {
@@ -1538,7 +1604,10 @@ function readProducts() {
   return data;
 }
 
-function saveProducts(data) {
+async function saveProducts(data) {
+  if (pgPool) {
+    return await dbSet('products', data);
+  }
   try {
     fs.writeFileSync(PRODUCTS_FILE, JSON.stringify(data, null, 2));
   } catch (error) {
@@ -1552,20 +1621,20 @@ function saveProducts(data) {
 // ============================================================
 
 // المنتجات والأقسام - يستخدمها الموقع الرئيسي لعرض البطاقات
-app.get('/api/products', (req, res) => {
-  const data = readProducts();
+app.get('/api/products', async (req, res) => {
+  const data = await readProducts();
   res.json(data);
 });
 
 // إضافة طلب جديد
-app.post('/api/orders', (req, res) => {
+app.post('/api/orders', async (req, res) => {
   const { product, details, userId, timestamp } = req.body;
 
   if (!product || !userId) {
     return res.status(400).json({ error: 'المنتج و userId مطلوبان' });
   }
 
-  const orders = readOrders();
+  const orders = await readOrders();
   const nextId = orders.reduce((max, o) => Math.max(max, Number(o.id) || 0), 0) + 1;
   const newOrder = {
     id: nextId,
@@ -1577,7 +1646,7 @@ app.post('/api/orders', (req, res) => {
   };
 
   orders.push(newOrder);
-  saveOrders(orders);
+  await saveOrders(orders);
 
   res.status(201).json({
     message: 'تم حفظ الطلب بنجاح',
@@ -1623,12 +1692,12 @@ app.get('/api/admin/check', (req, res) => {
 // ============================================================
 // إدارة الطلبات (تتطلب تسجيل دخول)
 // ============================================================
-app.get('/api/admin/orders', requireAdmin, (req, res) => {
-  const orders = readOrders();
+app.get('/api/admin/orders', requireAdmin, async (req, res) => {
+  const orders = await readOrders();
   res.json(orders.slice().reverse()); // الأحدث أولاً
 });
 
-app.patch('/api/admin/orders/:id', requireAdmin, (req, res) => {
+app.patch('/api/admin/orders/:id', requireAdmin, async (req, res) => {
   const { id } = req.params;
   const { status } = req.body || {};
   const allowedStatus = ['pending', 'completed', 'cancelled'];
@@ -1637,27 +1706,27 @@ app.patch('/api/admin/orders/:id', requireAdmin, (req, res) => {
     return res.status(400).json({ error: 'حالة غير صالحة' });
   }
 
-  const orders = readOrders();
+  const orders = await readOrders();
   const order = orders.find(o => String(o.id) === String(id));
   if (!order) {
     return res.status(404).json({ error: 'الطلب غير موجود' });
   }
 
   order.status = status;
-  saveOrders(orders);
+  await saveOrders(orders);
   res.json({ success: true, order });
 });
 
-app.delete('/api/admin/orders/:id', requireAdmin, (req, res) => {
+app.delete('/api/admin/orders/:id', requireAdmin, async (req, res) => {
   const { id } = req.params;
-  const orders = readOrders();
+  const orders = await readOrders();
   const filtered = orders.filter(o => String(o.id) !== String(id));
 
   if (filtered.length === orders.length) {
     return res.status(404).json({ error: 'الطلب غير موجود' });
   }
 
-  saveOrders(filtered);
+  await saveOrders(filtered);
   res.json({ success: true });
 });
 
@@ -1666,12 +1735,12 @@ app.delete('/api/admin/orders/:id', requireAdmin, (req, res) => {
 // ============================================================
 
 // إرجاع كل بيانات المنتجات للتحرير
-app.get('/api/admin/products', requireAdmin, (req, res) => {
-  res.json(readProducts());
+app.get('/api/admin/products', requireAdmin, async (req, res) => {
+  res.json(await readProducts());
 });
 
 // استبدال منتجات قسم واحد بالكامل
-app.put('/api/admin/products/:tabId', requireAdmin, (req, res) => {
+app.put('/api/admin/products/:tabId', requireAdmin, async (req, res) => {
   const { tabId } = req.params;
   const { items } = req.body || {};
 
@@ -1679,18 +1748,18 @@ app.put('/api/admin/products/:tabId', requireAdmin, (req, res) => {
     return res.status(400).json({ error: 'items يجب أن تكون مصفوفة' });
   }
 
-  const data = readProducts();
+  const data = await readProducts();
   if (!data.tabsConfig.find(t => t.id === tabId)) {
     return res.status(404).json({ error: 'القسم غير موجود' });
   }
 
   data.products[tabId] = items;
-  saveProducts(data);
+  await saveProducts(data);
   res.json({ success: true });
 });
 
 // إضافة قسم (تبويب) جديد
-app.post('/api/admin/tabs', requireAdmin, (req, res) => {
+app.post('/api/admin/tabs', requireAdmin, async (req, res) => {
   const { id, label, iconUrl } = req.body || {};
 
   if (!id || !label) {
@@ -1700,7 +1769,7 @@ app.post('/api/admin/tabs', requireAdmin, (req, res) => {
     return res.status(400).json({ error: 'المعرف (id) يجب أن يحتوي على أحرف/أرقام إنجليزية فقط' });
   }
 
-  const data = readProducts();
+  const data = await readProducts();
   if (data.tabsConfig.find(t => t.id === id)) {
     return res.status(409).json({ error: 'هذا القسم موجود بالفعل' });
   }
@@ -1711,16 +1780,16 @@ app.post('/api/admin/tabs', requireAdmin, (req, res) => {
 
   data.tabsConfig.push({ id, label, icon });
   data.products[id] = [];
-  saveProducts(data);
+  await saveProducts(data);
   res.status(201).json({ success: true });
 });
 
 // تعديل عنوان/أيقونة قسم موجود
-app.put('/api/admin/tabs/:tabId', requireAdmin, (req, res) => {
+app.put('/api/admin/tabs/:tabId', requireAdmin, async (req, res) => {
   const { tabId } = req.params;
   const { label, iconUrl } = req.body || {};
 
-  const data = readProducts();
+  const data = await readProducts();
   const tab = data.tabsConfig.find(t => t.id === tabId);
   if (!tab) {
     return res.status(404).json({ error: 'القسم غير موجود' });
@@ -1729,14 +1798,14 @@ app.put('/api/admin/tabs/:tabId', requireAdmin, (req, res) => {
   if (label) tab.label = label;
   if (iconUrl) tab.icon = `<img src="${iconUrl}" alt="${label || tab.label}" style="width:133px;height:133px;object-fit:contain;" />`;
 
-  saveProducts(data);
+  await saveProducts(data);
   res.json({ success: true });
 });
 
 // حذف قسم بالكامل
-app.delete('/api/admin/tabs/:tabId', requireAdmin, (req, res) => {
+app.delete('/api/admin/tabs/:tabId', requireAdmin, async (req, res) => {
   const { tabId } = req.params;
-  const data = readProducts();
+  const data = await readProducts();
   const idx = data.tabsConfig.findIndex(t => t.id === tabId);
 
   if (idx === -1) {
@@ -1745,7 +1814,7 @@ app.delete('/api/admin/tabs/:tabId', requireAdmin, (req, res) => {
 
   data.tabsConfig.splice(idx, 1);
   delete data.products[tabId];
-  saveProducts(data);
+  await saveProducts(data);
   res.json({ success: true });
 });
 
