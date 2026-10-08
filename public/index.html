@@ -113,6 +113,7 @@
       <label for="userId">🆔 ID / Email</label>
       <input type="text" id="userId" placeholder="مثال: player123@gmail.com" dir="ltr" />
     </div>
+    <div id="customFieldsBlock" style="display:none"></div>
     <div id="gameFieldsBlock" style="display:none">
       <label for="playerId" id="playerIdLabel">Player ID<span style="color:#ff4444">*</span></label>
       <input type="text" id="playerId" placeholder="Player ID" dir="ltr" />
@@ -523,7 +524,22 @@
     if (!pendingOrder) return;
     const fields = pendingOrder.orderFields;
     let userId, server = '';
-    if (fields) {
+    let extra = null;
+    if (fields && Array.isArray(fields.fields) && fields.fields.length) {
+      extra = {};
+      let firstBad = null;
+      fields.fields.forEach(f => {
+        const inp = document.getElementById('cf_' + f.key);
+        const val = inp.value.trim();
+        const bad = !val;
+        document.getElementById('cf_' + f.key + '_err').style.display = bad ? 'block' : 'none';
+        inp.style.borderColor = bad ? '#ff4444' : '#2a2a3a';
+        if (bad && !firstBad) firstBad = inp;
+        extra[f.label] = val;
+      });
+      if (firstBad) { firstBad.focus(); return; }
+      userId = extra['User ID'] || Object.values(extra)[0];
+    } else if (fields) {
       const pidInput = document.getElementById('playerId');
       const srvInput = document.getElementById('serverSelect');
       userId = pidInput.value.trim();
@@ -553,6 +569,7 @@
       details: pendingOrder.productDetail,
       userId: userId,
       server: server,
+      extra: extra,
       timestamp: new Date().toISOString()
     };
 
@@ -562,7 +579,7 @@
       `🛒 طلب جديد:\n` +
       `📱 المنتج: ${pendingOrder.tabLabel}\n` +
       `📦 التفاصيل: ${pendingOrder.productDetail}\n` + // يحتوي على السعر الآن
-      `🆔 ${fields ? 'Player ID' : 'ID/Email'}: ${userId}` +
+      (extra ? Object.entries(extra).map(([k, v]) => `${k}: ${v}`).join('\n') : `🆔 ${fields ? 'Player ID' : 'ID/Email'}: ${userId}`) +
       (server ? `\n🌍 Server: ${server}` : '')
     );
     window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
@@ -591,6 +608,14 @@
     const GANGSTAR_FIELDS = { playerIdLabel: 'Player ID', servers: ['SouthEastAsia','SouthAsia','EastEurope','MENA','SouthAmerica','NorthAmerica'] };
     let fields = tab && tab.orderFields ? tab.orderFields : null;
     if (!fields && tab && /gangstar/i.test((tab.id || '') + ' ' + (tab.label || ''))) fields = GANGSTAR_FIELDS;
+    // OneState: بيانات مطلوبة (اسم المستخدم، ID، الحساب، كلمة المرور)
+    const ONESTATE_FIELDS = { fields: [
+      { key: 'username', label: 'User name', type: 'text' },
+      { key: 'userid', label: 'User ID', type: 'text' },
+      { key: 'account', label: 'Account (Facebook/E-mail/Discord)', type: 'text' },
+      { key: 'password', label: 'Password', type: 'password' }
+    ] };
+    if (!fields && tab && /onestate|one\s*state/i.test((tab.id || '') + ' ' + (tab.label || ''))) fields = ONESTATE_FIELDS;
     // أقسام تحتاج Player ID فقط (بدون سيرفر)
     const ID_ONLY_TABS = ['pubg', 'vn', 'jawaker', 'hiya', 'freefire'];
     if (!fields && tab && ID_ONLY_TABS.includes(tab.id)) fields = { playerIdLabel: 'Player ID', servers: [] };
@@ -598,8 +623,16 @@
     document.getElementById('modalProductDetail').textContent = productDetail;
     document.getElementById('userId').value = '';
     document.getElementById('defaultIdBlock').style.display = fields ? 'none' : 'block';
-    document.getElementById('gameFieldsBlock').style.display = fields ? 'block' : 'none';
-    if (fields) {
+    const custom = fields && Array.isArray(fields.fields) && fields.fields.length ? fields.fields : null;
+    const cBlock = document.getElementById('customFieldsBlock');
+    cBlock.style.display = custom ? 'block' : 'none';
+    cBlock.innerHTML = custom ? custom.map(f => `
+      <label for="cf_${f.key}">${f.label}<span style="color:#ff4444">*</span></label>
+      <input type="${f.type === 'password' ? 'password' : 'text'}" id="cf_${f.key}" data-key="${f.key}" placeholder="${f.label}" dir="ltr" autocomplete="off" />
+      <div class="field-error" id="cf_${f.key}_err" style="display:none;color:#ff4444;font-size:.8rem;margin:4px 0 8px">Field is required</div>`).join('') : '';
+    if (custom) document.getElementById('defaultIdBlock').style.display = 'none';
+    document.getElementById('gameFieldsBlock').style.display = (fields && !custom) ? 'block' : 'none';
+    if (fields && !custom) {
       document.getElementById('playerIdLabel').innerHTML = (fields.playerIdLabel || 'Player ID') + '<span style="color:#ff4444">*</span>';
       const sel = document.getElementById('serverSelect');
       document.getElementById('serverBlock').style.display = (fields.servers && fields.servers.length) ? 'block' : 'none';
@@ -611,7 +644,7 @@
       document.getElementById('serverError').style.display = 'none';
     }
     document.getElementById('orderModal').classList.add('active');
-    document.getElementById(fields ? 'playerId' : 'userId').focus();
+    (document.querySelector('#customFieldsBlock input') || document.getElementById(fields ? 'playerId' : 'userId')).focus();
   };
 
   window.closeModal = function() {
