@@ -109,8 +109,20 @@
       <div class="preview-label">المنتج المطلوب</div>
       <div class="preview-detail" id="modalProductDetail">-</div>
     </div>
-    <label for="userId">🆔 ID / Email</label>
-    <input type="text" id="userId" placeholder="مثال: player123@gmail.com" dir="ltr" />
+    <div id="defaultIdBlock">
+      <label for="userId">🆔 ID / Email</label>
+      <input type="text" id="userId" placeholder="مثال: player123@gmail.com" dir="ltr" />
+    </div>
+    <div id="gameFieldsBlock" style="display:none">
+      <label for="playerId" id="playerIdLabel">Player ID<span style="color:#ff4444">*</span></label>
+      <input type="text" id="playerId" placeholder="Player ID" dir="ltr" />
+      <div class="field-error" id="playerIdError" style="display:none;color:#ff4444;font-size:.8rem;margin:4px 0 8px">Field is required</div>
+      <label for="serverSelect">Server<span style="color:#ff4444">*</span></label>
+      <select id="serverSelect" dir="ltr" style="width:100%;padding:12px;border-radius:10px;border:2px solid #2a2a3a;background:#16161f;color:#fff;font-size:1rem;">
+        <option value="">-Please Select-</option>
+      </select>
+      <div class="field-error" id="serverError" style="display:none;color:#ff4444;font-size:.8rem;margin:4px 0 8px">Field is required</div>
+    </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal()">إلغاء</button>
       <button class="btn-send" onclick="confirmOrder()">✅ إرسال الطلب</button>
@@ -506,23 +518,39 @@
   }
 
   window.confirmOrder = async function() {
-    const userId = document.getElementById('userId').value.trim();
-    if (!userId) {
-      const input = document.getElementById('userId');
-      input.style.borderColor = '#ff4444';
-      input.placeholder = '⚠️ الرجاء إدخال ID أو Email';
-      input.focus();
-      return;
-    }
-    document.getElementById('userId').style.borderColor = '#2a2a3a';
-
     if (!pendingOrder) return;
+    const fields = pendingOrder.orderFields;
+    let userId, server = '';
+    if (fields) {
+      const pidInput = document.getElementById('playerId');
+      const srvInput = document.getElementById('serverSelect');
+      userId = pidInput.value.trim();
+      server = srvInput.value;
+      const pidBad = !userId, srvBad = !server;
+      document.getElementById('playerIdError').style.display = pidBad ? 'block' : 'none';
+      document.getElementById('serverError').style.display = srvBad ? 'block' : 'none';
+      pidInput.style.borderColor = pidBad ? '#ff4444' : '#2a2a3a';
+      srvInput.style.borderColor = srvBad ? '#ff4444' : '#2a2a3a';
+      if (pidBad || srvBad) { (pidBad ? pidInput : srvInput).focus(); return; }
+    } else {
+      userId = document.getElementById('userId').value.trim();
+      if (!userId) {
+        const input = document.getElementById('userId');
+        input.style.borderColor = '#ff4444';
+        input.placeholder = '⚠️ الرجاء إدخال ID أو Email';
+        input.focus();
+        return;
+      }
+      document.getElementById('userId').style.borderColor = '#2a2a3a';
+    }
+
 
     // ===== 1. تحضير بيانات الطلب =====
     const orderData = {
       product: pendingOrder.tabLabel,
       details: pendingOrder.productDetail,
       userId: userId,
+      server: server,
       timestamp: new Date().toISOString()
     };
 
@@ -532,7 +560,8 @@
       `🛒 طلب جديد:\n` +
       `📱 المنتج: ${pendingOrder.tabLabel}\n` +
       `📦 التفاصيل: ${pendingOrder.productDetail}\n` + // يحتوي على السعر الآن
-      `🆔 ID/Email: ${userId}`
+      `🆔 ${fields ? 'Player ID' : 'ID/Email'}: ${userId}` +
+      (server ? `\n🌍 Server: ${server}` : '')
     );
     window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
 
@@ -554,12 +583,26 @@
     }
   };
 
-  window.openModal = function(tabLabel, productDetail) {
-    pendingOrder = { tabLabel, productDetail };
+  window.openModal = function(tabLabel, productDetail, tabId) {
+    const tab = tabsConfig.find(t => t.id === tabId);
+    const fields = tab && tab.orderFields ? tab.orderFields : null;
+    pendingOrder = { tabLabel, productDetail, orderFields: fields };
     document.getElementById('modalProductDetail').textContent = productDetail;
     document.getElementById('userId').value = '';
+    document.getElementById('defaultIdBlock').style.display = fields ? 'none' : 'block';
+    document.getElementById('gameFieldsBlock').style.display = fields ? 'block' : 'none';
+    if (fields) {
+      document.getElementById('playerIdLabel').innerHTML = (fields.playerIdLabel || 'Player ID') + '<span style="color:#ff4444">*</span>';
+      const sel = document.getElementById('serverSelect');
+      sel.innerHTML = '<option value="">-Please Select-</option>' +
+        (fields.servers || []).map(sv => `<option value="${sv}">${sv}</option>`).join('');
+      ['playerId'].forEach(i => { const e = document.getElementById(i); e.value = ''; e.style.borderColor = '#2a2a3a'; });
+      sel.style.borderColor = '#2a2a3a';
+      document.getElementById('playerIdError').style.display = 'none';
+      document.getElementById('serverError').style.display = 'none';
+    }
     document.getElementById('orderModal').classList.add('active');
-    document.getElementById('userId').focus();
+    document.getElementById(fields ? 'playerId' : 'userId').focus();
   };
 
   window.closeModal = function() {
@@ -567,11 +610,9 @@
     pendingOrder = null;
   };
 
-  document.getElementById('userId').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') {
-      confirmOrder();
-    }
-  });
+  ['userId','playerId'].forEach(id => document.getElementById(id).addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') confirmOrder();
+  }));
 
   document.getElementById('orderModal').addEventListener('click', function(e) {
     if (e.target === this) {
@@ -661,6 +702,7 @@
       orderBtn.className = 'order-btn';
       orderBtn.dataset.productName = productName;
       orderBtn.dataset.productDetail = fullDetail;
+      orderBtn.dataset.tabId = tab.id;
       orderBtn.innerHTML = `
         <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
         اطلب الآن
@@ -687,7 +729,7 @@
     const productDetail = target.dataset.productDetail;
 
     if (productName && productDetail) {
-      openModal(productName, productDetail);
+      openModal(productName, productDetail, target.dataset.tabId);
     }
   });
 
