@@ -117,11 +117,13 @@
       <label for="playerId" id="playerIdLabel">Player ID<span style="color:#ff4444">*</span></label>
       <input type="text" id="playerId" placeholder="Player ID" dir="ltr" />
       <div class="field-error" id="playerIdError" style="display:none;color:#ff4444;font-size:.8rem;margin:4px 0 8px">Field is required</div>
+      <div id="serverBlock">
       <label for="serverSelect">Server<span style="color:#ff4444">*</span></label>
       <select id="serverSelect" dir="ltr" style="width:100%;padding:12px;border-radius:10px;border:2px solid #2a2a3a;background:#16161f;color:#fff;font-size:1rem;">
         <option value="">-Please Select-</option>
       </select>
       <div class="field-error" id="serverError" style="display:none;color:#ff4444;font-size:.8rem;margin:4px 0 8px">Field is required</div>
+      </div>
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal()">إلغاء</button>
@@ -526,7 +528,7 @@
       const srvInput = document.getElementById('serverSelect');
       userId = pidInput.value.trim();
       server = srvInput.value;
-      const pidBad = !userId, srvBad = !server;
+      const pidBad = !userId, srvBad = !!(fields.servers && fields.servers.length) && !server;
       document.getElementById('playerIdError').style.display = pidBad ? 'block' : 'none';
       document.getElementById('serverError').style.display = srvBad ? 'block' : 'none';
       pidInput.style.borderColor = pidBad ? '#ff4444' : '#2a2a3a';
@@ -589,6 +591,9 @@
     const GANGSTAR_FIELDS = { playerIdLabel: 'Player ID', servers: ['SouthEastAsia','SouthAsia','EastEurope','MENA','SouthAmerica','NorthAmerica'] };
     let fields = tab && tab.orderFields ? tab.orderFields : null;
     if (!fields && tab && /gangstar/i.test((tab.id || '') + ' ' + (tab.label || ''))) fields = GANGSTAR_FIELDS;
+    // أقسام تحتاج Player ID فقط (بدون سيرفر)
+    const ID_ONLY_TABS = ['pubg', 'vn', 'jawaker', 'hiya', 'freefire'];
+    if (!fields && tab && ID_ONLY_TABS.includes(tab.id)) fields = { playerIdLabel: 'Player ID', servers: [] };
     pendingOrder = { tabLabel, productDetail, orderFields: fields };
     document.getElementById('modalProductDetail').textContent = productDetail;
     document.getElementById('userId').value = '';
@@ -597,6 +602,7 @@
     if (fields) {
       document.getElementById('playerIdLabel').innerHTML = (fields.playerIdLabel || 'Player ID') + '<span style="color:#ff4444">*</span>';
       const sel = document.getElementById('serverSelect');
+      document.getElementById('serverBlock').style.display = (fields.servers && fields.servers.length) ? 'block' : 'none';
       sel.innerHTML = '<option value="">-Please Select-</option>' +
         (fields.servers || []).map(sv => `<option value="${sv}">${sv}</option>`).join('');
       ['playerId'].forEach(i => { const e = document.getElementById(i); e.value = ''; e.style.borderColor = '#2a2a3a'; });
