@@ -1628,7 +1628,7 @@ app.get('/api/products', async (req, res) => {
 
 // إضافة طلب جديد
 app.post('/api/orders', async (req, res) => {
-  const { product, details, userId, timestamp } = req.body;
+  const { product, details, userId, server, timestamp } = req.body;
 
   if (!product || !userId) {
     return res.status(400).json({ error: 'المنتج و userId مطلوبان' });
@@ -1641,6 +1641,7 @@ app.post('/api/orders', async (req, res) => {
     product,
     details: details || '',
     userId,
+    server: server || '',
     timestamp: timestamp || new Date().toISOString(),
     status: 'pending'
   };
