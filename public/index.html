@@ -585,7 +585,10 @@
 
   window.openModal = function(tabLabel, productDetail, tabId) {
     const tab = tabsConfig.find(t => t.id === tabId);
-    const fields = tab && tab.orderFields ? tab.orderFields : null;
+    // إعداد افتراضي لقسم Gangstar حتى لو أُضيف من لوحة الأدمن بدون orderFields
+    const GANGSTAR_FIELDS = { playerIdLabel: 'Player ID', servers: ['SouthEastAsia','SouthAsia','EastEurope','MENA','SouthAmerica','NorthAmerica'] };
+    let fields = tab && tab.orderFields ? tab.orderFields : null;
+    if (!fields && tab && /gangstar/i.test((tab.id || '') + ' ' + (tab.label || ''))) fields = GANGSTAR_FIELDS;
     pendingOrder = { tabLabel, productDetail, orderFields: fields };
     document.getElementById('modalProductDetail').textContent = productDetail;
     document.getElementById('userId').value = '';
