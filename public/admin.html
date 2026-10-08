@@ -304,7 +304,7 @@ function renderOrders() {
             <td>${o.id}</td>
             <td>${escapeHtml(o.product)}</td>
             <td>${escapeHtml(o.details)}</td>
-            <td dir="ltr" style="text-align:right">${escapeHtml(o.userId)}</td>
+            <td dir="ltr" style="text-align:right">${escapeHtml(o.userId)}${o.server ? `<br><small>🌍 ${escapeHtml(o.server)}</small>` : ""}</td>
             <td>${new Date(o.timestamp).toLocaleString('ar-EG')}</td>
             <td><span class="status-badge status-${o.status}">${statusLabel(o.status)}</span></td>
             <td>
