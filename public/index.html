@@ -689,6 +689,7 @@
       let productDetail = '';
 
       // نضيف كل الحقول إلى productDetail بما فيها السعر
+      if (p.name) { detailHtml += `<div class="tokens">${p.name}</div>`; productDetail += p.name + ' '; }
       if (p.usd) { detailHtml += `<div class="usd">${p.usd}</div>`; productDetail += p.usd + ' '; }
       if (p.diamonds) { detailHtml += `<div class="diamonds">${p.diamonds}</div>`; productDetail += p.diamonds + ' '; }
       if (p.tokens) { detailHtml += `<div class="tokens">${p.tokens}</div>`; productDetail += p.tokens + ' '; }
@@ -718,7 +719,7 @@
       `;
 
       card.innerHTML = `
-        <div class="icon">${tab.icon}</div>
+        <div class="icon">${p.image ? `<img src="${p.image}" alt="${p.name || ''}" style="width:133px;height:133px;object-fit:contain;" />` : tab.icon}</div>
         ${detailHtml}
       `;
       card.appendChild(orderBtn);
