@@ -1609,7 +1609,7 @@ const ACCELERATORS = [
   { name: 'المسرع الأحمر', image: 'https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-112,h-23,c-at_least/storage/flags/85437a00241c5a62dcabe7d2c275aa65-1665828678.webp', shekel: '', label: 'مسرع' },
   { name: 'المسرع الأزرق', image: 'https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-109,h-23,c-at_least/storage/flags/766d2aa08e24458feba4ddfa30b2829e-1665828973.webp', shekel: '', label: 'مسرع' },
   { name: 'المسرع الأسود', image: 'https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-116,h-23,c-at_least/storage/flags/f86fce03a8283b9b61d33a1137221beb-1665829064.webp', shekel: '', label: 'مسرع' },
-  { name: 'المسرع الذهبي', shekel: '', label: 'مسرع' }
+  { name: 'المسرع الذهبي', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQauEYTMKl3MWkxot9EOBmRw7aX-zyzDEfXA3GqvPNb4Q&s', shekel: '', label: 'مسرع' }
 ];
 
 async function readProducts() {
@@ -1626,6 +1626,16 @@ async function readProducts() {
     }
   } catch (e) {
     console.error('تعذر ترحيل المسرعات:', e);
+  }
+  // إضافة صورة المسرع الذهبي إن كان موجودًا بدون صورة
+  try {
+    const gold = data.products && data.products.jawaker && data.products.jawaker.find(p => p.name === 'المسرع الذهبي' && !p.image);
+    if (gold) {
+      gold.image = ACCELERATORS[3].image;
+      await saveProducts(data);
+    }
+  } catch (e) {
+    console.error('تعذر تحديث صورة المسرع الذهبي:', e);
   }
   return data;
 }
