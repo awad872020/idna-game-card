@@ -149,6 +149,22 @@
       "id": "minecraft",
       "label": "⛏️ Minecraft",
       "icon": "<img src=\"https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-98,h-23,c-at_least/storage/card-categories/4e6307ca0931b629b5985a65343cd04d-1695203235.webp\" alt=\"Minecraft\" style=\"width:133px;height:133px;object-fit:contain;\" />"
+    },
+    {
+      "id": "gangstar",
+      "label": "🔫 Gangstar Mirage City",
+      "icon": "<span style=\"font-size:64px;line-height:133px;\">🏙️</span>",
+      "orderFields": {
+        "playerIdLabel": "Player ID",
+        "servers": [
+          "SouthEastAsia",
+          "SouthAsia",
+          "EastEurope",
+          "MENA",
+          "SouthAmerica",
+          "NorthAmerica"
+        ]
+      }
     }
   ],
   "products": {
@@ -1396,6 +1412,7 @@
         "shekel": "شيكل 175",
         "label": "Minecoins"
       }
-    ]
+    ],
+    "gangstar": []
   }
 }
