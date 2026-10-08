@@ -1572,7 +1572,7 @@ async function saveOrders(orders) {
   }
 }
 
-async function readProducts() {
+async function readProductsRaw() {
   if (pgPool) {
     return await dbGet('products', JSON.parse(JSON.stringify(DEFAULT_PRODUCTS_DATA)));
   }
@@ -1601,6 +1601,32 @@ async function readProducts() {
     }
   }
 
+  return data;
+}
+
+// ترحيل لمرة واحدة: إضافة المسرعات إلى قسم جواكر في البيانات المحفوظة على الاستضافة
+const ACCELERATORS = [
+  { name: 'المسرع الأحمر', image: 'https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-112,h-23,c-at_least/storage/flags/85437a00241c5a62dcabe7d2c275aa65-1665828678.webp', shekel: '', label: 'مسرع' },
+  { name: 'المسرع الأزرق', image: 'https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-109,h-23,c-at_least/storage/flags/766d2aa08e24458feba4ddfa30b2829e-1665828973.webp', shekel: '', label: 'مسرع' },
+  { name: 'المسرع الأسود', image: 'https://ik.imagekit.io/arabcard/tr:q-100:q-80:q-40:w-116,h-23,c-at_least/storage/flags/f86fce03a8283b9b61d33a1137221beb-1665829064.webp', shekel: '', label: 'مسرع' },
+  { name: 'المسرع الذهبي', shekel: '', label: 'مسرع' }
+];
+
+async function readProducts() {
+  const data = await readProductsRaw();
+  try {
+    data.migrations = data.migrations || {};
+    if (!data.migrations.jawakerAccelerators && data.products && Array.isArray(data.tabsConfig) && data.tabsConfig.some(t => t.id === 'jawaker')) {
+      data.products.jawaker = data.products.jawaker || [];
+      ACCELERATORS.forEach(a => {
+        if (!data.products.jawaker.some(p => p.name === a.name)) data.products.jawaker.push({ ...a });
+      });
+      data.migrations.jawakerAccelerators = true;
+      await saveProducts(data);
+    }
+  } catch (e) {
+    console.error('تعذر ترحيل المسرعات:', e);
+  }
   return data;
 }
 
