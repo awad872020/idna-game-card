@@ -1856,6 +1856,166 @@ app.delete('/api/admin/tabs/:tabId', requireAdmin, async (req, res) => {
   res.json({ success: true });
 });
 
+// ============================================================
+// حسابات المستخدمين (إيميل + كلمة مرور) والرصيد — تتطلب DATABASE_URL
+// ============================================================
+let usersReady = null;
+function ensureUserTables() {
+  if (!pgPool) return Promise.resolve(false);
+  if (!usersReady) {
+    usersReady = (async () => {
+      await dbReadyPromise;
+      await pgPool.query(`
+        CREATE TABLE IF NOT EXISTS users (
+          id SERIAL PRIMARY KEY,
+          email TEXT UNIQUE NOT NULL,
+          password_hash TEXT NOT NULL,
+          balance NUMERIC(12,2) NOT NULL DEFAULT 0 CHECK (balance >= 0),
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE TABLE IF NOT EXISTS balance_log (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          amount NUMERIC(12,2) NOT NULL,
+          note TEXT,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+      `);
+      return true;
+    })().catch(err => { console.error('❌ فشل إنشاء جداول المستخدمين:', err); usersReady = null; return false; });
+  }
+  return usersReady;
+}
+
+function hashPassword(password) {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.scryptSync(password, salt, 64).toString('hex');
+  return `${salt}:${hash}`;
+}
+function verifyPassword(password, stored) {
+  const [salt, hash] = String(stored).split(':');
+  if (!salt || !hash) return false;
+  const test = crypto.scryptSync(password, salt, 64);
+  const real = Buffer.from(hash, 'hex');
+  return test.length === real.length && crypto.timingSafeEqual(test, real);
+}
+
+const USER_SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 يومًا
+const userSessions = new Map(); // token -> { userId, expiry }
+setInterval(() => {
+  const now = Date.now();
+  for (const [t, s] of userSessions.entries()) if (now > s.expiry) userSessions.delete(t);
+}, 60 * 60 * 1000);
+
+function setUserCookie(res, token, maxAgeSec) {
+  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+  res.setHeader('Set-Cookie', `user_token=${token}; HttpOnly; Path=/; Max-Age=${maxAgeSec}; SameSite=Lax${secure}`);
+}
+
+// حد بسيط لمحاولات تسجيل الدخول (لكل IP)
+const loginAttempts = new Map();
+function tooManyAttempts(ip) {
+  const now = Date.now();
+  const rec = (loginAttempts.get(ip) || []).filter(t => now - t < 15 * 60 * 1000);
+  loginAttempts.set(ip, rec);
+  return rec.length >= 10;
+}
+function recordAttempt(ip) { loginAttempts.set(ip, [...(loginAttempts.get(ip) || []), Date.now()]); }
+
+async function requireDb(req, res, next) {
+  if (!(await ensureUserTables())) {
+    return res.status(503).json({ error: 'نظام الحسابات يتطلب قاعدة بيانات Postgres (DATABASE_URL)' });
+  }
+  next();
+}
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+app.post('/api/auth/register', requireDb, async (req, res) => {
+  const email = String((req.body || {}).email || '').trim().toLowerCase();
+  const password = String((req.body || {}).password || '');
+  if (!EMAIL_RE.test(email) || email.length > 254) return res.status(400).json({ error: 'البريد الإلكتروني غير صالح' });
+  if (password.length < 8 || password.length > 128) return res.status(400).json({ error: 'كلمة المرور يجب أن تكون 8 أحرف على الأقل' });
+  try {
+    const r = await pgPool.query(
+      'INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING id, email, balance',
+      [email, hashPassword(password)]
+    );
+    const user = r.rows[0];
+    const token = crypto.randomBytes(32).toString('hex');
+    userSessions.set(token, { userId: user.id, expiry: Date.now() + USER_SESSION_TTL_MS });
+    setUserCookie(res, token, USER_SESSION_TTL_MS / 1000);
+    res.status(201).json({ email: user.email, balance: Number(user.balance) });
+  } catch (e) {
+    if (e.code === '23505') return res.status(409).json({ error: 'هذا البريد مسجّل مسبقًا' });
+    console.error(e);
+    res.status(500).json({ error: 'تعذّر إنشاء الحساب' });
+  }
+});
+
+app.post('/api/auth/login', requireDb, async (req, res) => {
+  if (tooManyAttempts(req.ip)) return res.status(429).json({ error: 'محاولات كثيرة، حاول لاحقًا' });
+  const email = String((req.body || {}).email || '').trim().toLowerCase();
+  const password = String((req.body || {}).password || '');
+  const r = await pgPool.query('SELECT id, email, password_hash, balance FROM users WHERE email = $1', [email]);
+  const user = r.rows[0];
+  if (!user || !verifyPassword(password, user.password_hash)) {
+    recordAttempt(req.ip);
+    return res.status(401).json({ error: 'البريد أو كلمة المرور غير صحيحة' });
+  }
+  const token = crypto.randomBytes(32).toString('hex');
+  userSessions.set(token, { userId: user.id, expiry: Date.now() + USER_SESSION_TTL_MS });
+  setUserCookie(res, token, USER_SESSION_TTL_MS / 1000);
+  res.json({ email: user.email, balance: Number(user.balance) });
+});
+
+app.post('/api/auth/logout', (req, res) => {
+  const token = parseCookies(req)['user_token'];
+  if (token) userSessions.delete(token);
+  setUserCookie(res, '', 0);
+  res.json({ success: true });
+});
+
+app.get('/api/auth/me', async (req, res) => {
+  const s = userSessions.get(parseCookies(req)['user_token']);
+  if (!s || Date.now() > s.expiry || !(await ensureUserTables())) return res.json({ authenticated: false });
+  const r = await pgPool.query('SELECT email, balance FROM users WHERE id = $1', [s.userId]);
+  if (!r.rows[0]) return res.json({ authenticated: false });
+  res.json({ authenticated: true, email: r.rows[0].email, balance: Number(r.rows[0].balance) });
+});
+
+// ---- إدارة المستخدمين والرصيد (أدمن) ----
+app.get('/api/admin/users', requireAdmin, requireDb, async (req, res) => {
+  const r = await pgPool.query('SELECT id, email, balance, created_at FROM users ORDER BY created_at DESC');
+  res.json(r.rows.map(u => ({ ...u, balance: Number(u.balance) })));
+});
+
+// amount موجب = إضافة، سالب = خصم (لا يسمح بالنزول تحت صفر)
+app.post('/api/admin/users/:id/balance', requireAdmin, requireDb, async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const amount = Math.round(Number((req.body || {}).amount) * 100) / 100;
+  const note = String((req.body || {}).note || '').slice(0, 200);
+  if (!Number.isInteger(id) || !Number.isFinite(amount) || amount === 0 || Math.abs(amount) > 1000000) {
+    return res.status(400).json({ error: 'مبلغ غير صالح' });
+  }
+  const client = await pgPool.connect();
+  try {
+    await client.query('BEGIN');
+    const r = await client.query('UPDATE users SET balance = balance + $1 WHERE id = $2 RETURNING id, email, balance', [amount, id]);
+    if (!r.rows[0]) { await client.query('ROLLBACK'); return res.status(404).json({ error: 'المستخدم غير موجود' }); }
+    await client.query('INSERT INTO balance_log (user_id, amount, note) VALUES ($1, $2, $3)', [id, amount, note]);
+    await client.query('COMMIT');
+    res.json({ id, email: r.rows[0].email, balance: Number(r.rows[0].balance) });
+  } catch (e) {
+    await client.query('ROLLBACK').catch(() => {});
+    if (e.code === '23514') return res.status(400).json({ error: 'الرصيد لا يمكن أن يكون سالبًا' });
+    console.error(e);
+    res.status(500).json({ error: 'تعذّر تحديث الرصيد' });
+  } finally {
+    client.release();
+  }
+});
+
 // تشغيل الخادم
 app.listen(PORT, () => {
   console.log(`🚀 الخادم يعمل على http://localhost:${PORT}`);
