@@ -160,6 +160,7 @@
         <button class="btn small" onclick="loadUsers()">🔄 تحديث</button>
       </div>
       <div id="usersTableWrap"></div>
+      <div id="userPricesPanel" style="margin-top:26px"></div>
     </section>
 
   </main>
@@ -270,15 +271,17 @@ function renderUsers() {
   const list = allUsers.filter(u => !q || u.email.toLowerCase().includes(q));
   const wrap = document.getElementById('usersTableWrap');
   if (!list.length) { wrap.innerHTML = '<div class="empty-state">لا يوجد مستخدمون</div>'; return; }
-  wrap.innerHTML = '<table><thead><tr><th>#</th><th>الإيميل</th><th>الرصيد</th><th>تاريخ التسجيل</th><th>إضافة / خصم رصيد</th></tr></thead><tbody>' +
+  wrap.innerHTML = '<table><thead><tr><th>#</th><th>الإيميل</th><th>الرصيد (₪)</th><th>تاريخ التسجيل</th><th>إضافة / خصم رصيد</th></tr></thead><tbody>' +
     list.map(u => `<tr>
       <td>${u.id}</td>
       <td dir="ltr">${escUser(u.email)}</td>
-      <td><b style="color:#ffd700">${Number(u.balance).toFixed(2)}</b></td>
+      <td><b style="color:#ffd700" dir="ltr">₪ ${Number(u.balance).toFixed(2)}</b></td>
       <td>${new Date(u.created_at).toLocaleDateString('ar')}</td>
       <td style="white-space:nowrap">
-        <input type="number" step="0.01" id="amt-${u.id}" placeholder="المبلغ (سالب للخصم)" style="width:150px;padding:6px 10px;border-radius:8px;border:1px solid #2a2a3a;background:#0b0b0e;color:#fff" />
+        <input type="number" step="0.01" id="amt-${u.id}" placeholder="₪ المبلغ (سالب للخصم)" style="width:150px;padding:6px 10px;border-radius:8px;border:1px solid #2a2a3a;background:#0b0b0e;color:#fff" />
         <button class="btn small" onclick="changeBalance(${u.id})">تنفيذ</button>
+        <button class="btn small" onclick="openUserPrices(${u.id})" title="أسعار خاصة">💲 الأسعار</button>
+        <button class="btn small" onclick="resetPassword(${u.id})" title="كلمة مرور جديدة">🔑</button>
       </td></tr>`).join('') + '</tbody></table>';
 }
 async function changeBalance(id) {
@@ -290,9 +293,83 @@ async function changeBalance(id) {
     const u = allUsers.find(x => x.id === id);
     if (u) u.balance = r.balance;
     renderUsers();
-    showToast('✅ الرصيد الجديد: ' + Number(r.balance).toFixed(2));
+    showToast('✅ الرصيد الجديد: ₪' + Number(r.balance).toFixed(2));
   } catch (e) { if (e.message !== 'unauthorized') showToast('❌ ' + e.message); }
 }
+
+async function resetPassword(id) {
+  const u = allUsers.find(x => x.id === id);
+  const pw = prompt('كلمة مرور جديدة للمستخدم ' + (u ? u.email : '') + '\n(اتركها فارغة لتوليد كلمة عشوائية، 8 أحرف على الأقل)', '');
+  if (pw === null) return;
+  try {
+    const r = await api('/api/admin/users/' + id + '/password', { method: 'POST', body: JSON.stringify({ password: pw }) });
+    prompt('كلمة المرور الجديدة (انسخها وأرسلها للعميل، لن تظهر مرة أخرى):', r.password);
+  } catch (e) { if (e.message !== 'unauthorized') showToast('❌ ' + e.message); }
+}
+
+// ---- أسعار خاصة لكل عميل ----
+let priceUserId = null;
+let priceItems = [];
+async function openUserPrices(id) {
+  priceUserId = id;
+  try {
+    priceItems = await api('/api/admin/users/' + id + '/prices');
+    renderUserPrices();
+    document.getElementById('userPricesPanel').scrollIntoView({ behavior: 'smooth' });
+  } catch (e) { if (e.message !== 'unauthorized') showToast('❌ ' + e.message); }
+}
+function renderUserPrices() {
+  const u = allUsers.find(x => x.id === priceUserId);
+  const tabs = [...new Map(priceItems.map(i => [i.tabId, i.tabLabel])).entries()];
+  const panel = document.getElementById('userPricesPanel');
+  const prevTab = (document.getElementById('priceTabFilter') || {}).value || 'all';
+  const prevQ = (document.getElementById('priceSearch') || {}).value || '';
+  panel.innerHTML = `
+    <h3 style="margin-bottom:12px">💲 الأسعار الخاصة بـ <span dir="ltr" style="color:#ffd700">${escUser(u ? u.email : '')}</span></h3>
+    <div class="filters">
+      <select id="priceTabFilter" onchange="renderPriceRows()">
+        <option value="all">كل الأقسام</option>
+        ${tabs.map(([id, label]) => `<option value="${escUser(id)}" ${id === prevTab ? 'selected' : ''}>${label.replace(/<[^>]*>/g, '')}</option>`).join('')}
+      </select>
+      <input type="text" id="priceSearch" value="${escUser(prevQ)}" placeholder="🔍 بحث..." oninput="renderPriceRows()" />
+      <label style="display:flex;gap:6px;align-items:center;color:#9a9ab0"><input type="checkbox" id="priceOnlyCustom" onchange="renderPriceRows()" /> الخاصة فقط</label>
+      <button class="btn small" onclick="document.getElementById('userPricesPanel').innerHTML=''">✖ إغلاق</button>
+    </div>
+    <div id="priceRows"></div>`;
+  renderPriceRows();
+}
+function renderPriceRows() {
+  const tab = document.getElementById('priceTabFilter').value;
+  const q = document.getElementById('priceSearch').value.trim().toLowerCase();
+  const only = document.getElementById('priceOnlyCustom').checked;
+  const list = priceItems.filter(i => (tab === 'all' || i.tabId === tab) && (!q || i.title.toLowerCase().includes(q)) && (!only || i.customPrice !== null));
+  document.getElementById('priceRows').innerHTML = !list.length ? '<div class="empty-state">لا توجد عناصر</div>' :
+    '<table><thead><tr><th>القسم</th><th>العنصر</th><th>السعر العام (₪)</th><th>سعر العميل (₪)</th><th></th></tr></thead><tbody>' +
+    list.map(i => `<tr>
+      <td>${i.tabLabel.replace(/<[^>]*>/g, '')}</td>
+      <td>${escUser(i.title)}</td>
+      <td>${i.defaultPrice === null ? '-' : i.defaultPrice}</td>
+      <td><input type="number" step="0.01" min="0" id="cp-${i.key}" value="${i.customPrice === null ? '' : i.customPrice}" placeholder="افتراضي" style="width:110px;padding:6px 10px;border-radius:8px;border:1px solid ${i.customPrice !== null ? '#ffd700' : '#2a2a3a'};background:#0b0b0e;color:#fff" /></td>
+      <td style="white-space:nowrap">
+        <button class="btn small" onclick="saveCustomPrice('${i.key}')">حفظ</button>
+        <button class="btn small danger" onclick="clearCustomPrice('${i.key}')">إلغاء</button>
+      </td></tr>`).join('') + '</tbody></table>';
+}
+async function setCustomPrice(key, price) {
+  try {
+    const r = await api('/api/admin/users/' + priceUserId + '/prices', { method: 'PUT', body: JSON.stringify({ key, price }) });
+    const it = priceItems.find(x => x.key === key);
+    if (it) it.customPrice = r.customPrice;
+    renderPriceRows();
+    showToast(r.customPrice === null ? '✅ عاد للسعر العام' : '✅ تم حفظ السعر الخاص');
+  } catch (e) { if (e.message !== 'unauthorized') showToast('❌ ' + e.message); }
+}
+function saveCustomPrice(key) {
+  const v = document.getElementById('cp-' + key).value;
+  if (v === '') return showToast('أدخل السعر أو اضغط إلغاء');
+  setCustomPrice(key, Number(v));
+}
+function clearCustomPrice(key) { setCustomPrice(key, null); }
 
 // ================= الطلبات =================
 async function loadOrders() {
