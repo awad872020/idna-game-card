@@ -106,7 +106,7 @@
     <button class="login-icon-btn" id="loginIcon" onclick="onUserIconClick()" aria-label="الحساب" title="تسجيل الدخول">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
     </button>
-    <div class="user-balance" id="userBalance">💰 <span id="userBalanceValue">0.00</span> <small id="userEmailLabel"></small></div>
+    <div class="user-balance" id="userBalance">💰 <span dir="ltr">₪ <span id="userBalanceValue">0.00</span></span> <small id="userEmailLabel"></small></div>
   </div>
   <h1>🎮 Idna Gaming Card</h1>
   <p class="subtitle">24/7 · شحن فوري · دعم · أقل الأسعار في فلسطين</p>
@@ -166,7 +166,7 @@ async function refreshUser() {
 }
 function onUserIconClick() {
   if (currentUser) {
-    if (confirm('تسجيل الخروج؟')) fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).then(() => { currentUser = null; renderUser(); });
+    if (confirm('تسجيل الخروج؟')) fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).then(() => location.reload());
   } else {
     document.getElementById('authModal').classList.add('active');
     document.getElementById('authEmail').focus();
@@ -194,10 +194,8 @@ async function submitAuth() {
     });
     const d = await r.json();
     if (!r.ok) throw new Error(d.error || 'حدث خطأ');
-    currentUser = { email: d.email, balance: d.balance };
     document.getElementById('authPassword').value = '';
-    renderUser();
-    closeAuth();
+    location.reload(); // لإعادة تحميل المنتجات بالأسعار الخاصة بالعميل
   } catch (e) { err.textContent = e.message; }
 }
 document.getElementById('authPassword').addEventListener('keydown', e => { if (e.key === 'Enter') submitAuth(); });
@@ -841,6 +839,7 @@ setInterval(() => { if (currentUser) refreshUser(); }, 60000);
         detailHtml += `<div class="shekel">${p.shekel}</div>`; 
         productDetail += p.shekel + ' '; 
       }
+      if (p.customPrice) { detailHtml += `<div class="desc" style="color:#ffd700">⭐ سعرك الخاص</div>`; }
       if (p.label) { detailHtml += `<div class="desc">${p.label}</div>`; productDetail += p.label; }
 
       const fullDetail = `${productName} | ${productDetail.trim()}`;
