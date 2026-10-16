@@ -82,11 +82,32 @@
     ::-webkit-scrollbar { width: 6px; background: #0b0b0e; }
     ::-webkit-scrollbar-thumb { background: #2a2a4a; border-radius: 20px; }
     @media (max-width: 520px) { .store-header h1 { font-size: 1.7rem; } .card-grid { grid-template-columns: repeat(2,1fr); gap: 12px; } .card-item { padding: 14px 10px; } .order-btn { font-size: 0.75rem; padding: 8px 12px; } .tab-btn { padding: 10px 16px; font-size: 0.85rem; } .tab-btn .tab-icon { width: 80px; height: 80px; } .modal-box { padding: 28px 20px; } .modal-box h2 { font-size: 1.2rem; } }
+  
+    /* ===== حساب المستخدم ===== */
+    .store-header { position: relative; }
+    .user-bar { position: absolute; top: 18px; inset-inline-start: 18px; display: flex; align-items: center; gap: 10px; }
+    .login-icon-btn { width: 46px; height: 46px; border-radius: 50%; border: 2px solid #2a2a3a; background: #16161f; color: #f0f0ff; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: .2s; }
+    .login-icon-btn:hover { border-color: #ffd700; color: #ffd700; }
+    .user-balance { display: none; align-items: center; gap: 8px; background: #1a1a2e; border: 1px solid #ffd700; color: #ffd700; padding: 8px 16px; border-radius: 40px; font-weight: 700; font-size: .95rem; }
+    .user-balance small { color: #9a9ab0; font-weight: 500; }
+    .auth-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+    .auth-tabs button { flex: 1; padding: 10px; border-radius: 30px; border: 2px solid #2a2a3a; background: #16161f; color: #9a9aba; cursor: pointer; font-weight: 600; }
+    .auth-tabs button.active { border-color: #ffd700; color: #ffd700; }
+    #authModal input { width: 100%; padding: 12px; margin: 6px 0 10px; border-radius: 10px; border: 2px solid #2a2a3a; background: #16161f; color: #fff; font-size: 1rem; }
+    #authError { color: #ff6b6b; font-size: .85rem; min-height: 1.2em; margin-bottom: 8px; }
+    #authSubmit { width: 100%; padding: 13px; border: none; border-radius: 40px; background: #ffd700; color: #0b0b0e; font-weight: 700; font-size: 1rem; cursor: pointer; }
+    #authCancel { width: 100%; margin-top: 8px; padding: 10px; border: none; background: transparent; color: #9a9ab0; cursor: pointer; }
   </style>
 </head>
 <body>
 
 <div class="store-header">
+  <div class="user-bar">
+    <button class="login-icon-btn" id="loginIcon" onclick="onUserIconClick()" aria-label="الحساب" title="تسجيل الدخول">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+    </button>
+    <div class="user-balance" id="userBalance">💰 <span id="userBalanceValue">0.00</span> <small id="userEmailLabel"></small></div>
+  </div>
   <h1>🎮 Idna Gaming Card</h1>
   <p class="subtitle">24/7 · شحن فوري · دعم · أقل الأسعار في فلسطين</p>
   <div class="badges">
@@ -99,6 +120,90 @@
 <div class="tabs" id="tabContainer"></div>
 <button id="backBtn" onclick="goBack()">⬅ الرجوع إلى الأقسام الأساسية</button>
 <div id="contentContainer"></div>
+
+
+<!-- مودال تسجيل الدخول / إنشاء حساب -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal-box">
+    <h2 id="authTitle">👤 تسجيل الدخول</h2>
+    <div class="auth-tabs">
+      <button id="tabLogin" class="active" onclick="setAuthMode('login')">دخول</button>
+      <button id="tabRegister" onclick="setAuthMode('register')">حساب جديد</button>
+    </div>
+    <label for="authEmail">البريد الإلكتروني</label>
+    <input type="email" id="authEmail" dir="ltr" autocomplete="email" />
+    <label for="authPassword">كلمة المرور</label>
+    <input type="password" id="authPassword" dir="ltr" autocomplete="current-password" />
+    <div id="authError"></div>
+    <button id="authSubmit" onclick="submitAuth()">دخول</button>
+    <button id="authCancel" onclick="closeAuth()">إلغاء</button>
+  </div>
+</div>
+
+<script>
+let currentUser = null;
+let authMode = 'login';
+function renderUser() {
+  const bal = document.getElementById('userBalance');
+  const icon = document.getElementById('loginIcon');
+  if (currentUser) {
+    document.getElementById('userBalanceValue').textContent = Number(currentUser.balance).toFixed(2);
+    document.getElementById('userEmailLabel').textContent = currentUser.email;
+    bal.style.display = 'flex';
+    icon.title = 'تسجيل الخروج';
+  } else {
+    bal.style.display = 'none';
+    icon.title = 'تسجيل الدخول';
+  }
+}
+async function refreshUser() {
+  try {
+    const r = await fetch('/api/auth/me', { credentials: 'include' });
+    const d = await r.json();
+    currentUser = d.authenticated ? { email: d.email, balance: d.balance } : null;
+  } catch (e) { currentUser = null; }
+  renderUser();
+}
+function onUserIconClick() {
+  if (currentUser) {
+    if (confirm('تسجيل الخروج؟')) fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).then(() => { currentUser = null; renderUser(); });
+  } else {
+    document.getElementById('authModal').classList.add('active');
+    document.getElementById('authEmail').focus();
+  }
+}
+function closeAuth() { document.getElementById('authModal').classList.remove('active'); document.getElementById('authError').textContent = ''; }
+function setAuthMode(m) {
+  authMode = m;
+  document.getElementById('tabLogin').classList.toggle('active', m === 'login');
+  document.getElementById('tabRegister').classList.toggle('active', m === 'register');
+  document.getElementById('authSubmit').textContent = m === 'login' ? 'دخول' : 'إنشاء حساب';
+  document.getElementById('authPassword').autocomplete = m === 'login' ? 'current-password' : 'new-password';
+  document.getElementById('authError').textContent = '';
+}
+async function submitAuth() {
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  const err = document.getElementById('authError');
+  err.textContent = '';
+  try {
+    const r = await fetch('/api/auth/' + authMode, {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'حدث خطأ');
+    currentUser = { email: d.email, balance: d.balance };
+    document.getElementById('authPassword').value = '';
+    renderUser();
+    closeAuth();
+  } catch (e) { err.textContent = e.message; }
+}
+document.getElementById('authPassword').addEventListener('keydown', e => { if (e.key === 'Enter') submitAuth(); });
+refreshUser();
+setInterval(() => { if (currentUser) refreshUser(); }, 60000);
+</script>
 
 <!-- مودال الطلب -->
 <div class="modal-overlay" id="orderModal">
