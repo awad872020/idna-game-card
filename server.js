@@ -1658,7 +1658,9 @@ async function saveProducts(data) {
 
 // المنتجات والأقسام - يستخدمها الموقع الرئيسي لعرض البطاقات
 app.get('/api/products', async (req, res) => {
-  const data = await readProducts();
+  let data = await readProducts();
+  try { data = await applyUserPrices(data, await currentUserId(req)); } catch (e) { console.error(e); }
+  res.set('Cache-Control', 'no-store');
   res.json(data);
 });
 
@@ -2014,6 +2016,123 @@ app.post('/api/admin/users/:id/balance', requireAdmin, requireDb, async (req, re
   } finally {
     client.release();
   }
+});
+
+// ============================================================
+// أسعار خاصة لكل عميل
+// ============================================================
+let pricesReady = null;
+function ensurePriceTable() {
+  if (!pricesReady) {
+    pricesReady = ensureUserTables().then(async ok => {
+      if (!ok) return false;
+      await pgPool.query(`
+        CREATE TABLE IF NOT EXISTS user_prices (
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          item_key TEXT NOT NULL,
+          price NUMERIC(12,2) NOT NULL CHECK (price >= 0),
+          PRIMARY KEY (user_id, item_key)
+        )`);
+      return true;
+    }).catch(err => { console.error('❌ user_prices:', err); pricesReady = null; return false; });
+  }
+  return pricesReady;
+}
+
+// مفتاح ثابت لكل عنصر: يعتمد على حقوله غير السعرية (فلا يتأثر بتغيير السعر أو بالترتيب)
+function keyedItems(data) {
+  const out = [];
+  Object.keys(data.products || {}).forEach(tabId => {
+    const seen = {};
+    (data.products[tabId] || []).forEach(item => {
+      const rest = {};
+      Object.keys(item).sort().forEach(k => { if (k !== 'shekel' && k !== 'usd') rest[k] = item[k]; });
+      const h = tabId + '|' + crypto.createHash('md5').update(JSON.stringify(rest)).digest('hex').slice(0, 12);
+      seen[h] = (seen[h] || 0) + 1;
+      out.push({ key: h + '-' + seen[h], tabId, item, rest });
+    });
+  });
+  return out;
+}
+function parsePrice(str) {
+  const m = String(str || '').match(/[\d]+(?:\.\d+)?/);
+  return m ? Number(m[0]) : null;
+}
+function fmtPrice(n) { return Number.isInteger(n) ? String(n) : n.toFixed(2); }
+
+async function currentUserId(req) {
+  const s = userSessions.get(parseCookies(req)['user_token']);
+  return s && Date.now() <= s.expiry ? s.userId : null;
+}
+
+async function applyUserPrices(data, userId) {
+  if (!userId || !(await ensurePriceTable())) return data;
+  const r = await pgPool.query('SELECT item_key, price FROM user_prices WHERE user_id = $1', [userId]);
+  if (!r.rows.length) return data;
+  const map = new Map(r.rows.map(x => [x.item_key, Number(x.price)]));
+  const copy = JSON.parse(JSON.stringify(data));
+  keyedItems(copy).forEach(ki => {
+    if (map.has(ki.key)) { ki.item.shekel = 'شيكل ' + fmtPrice(map.get(ki.key)); ki.item.customPrice = true; }
+  });
+  return copy;
+}
+
+app.get('/api/admin/users/:id/prices', requireAdmin, requireDb, async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (!Number.isInteger(id)) return res.status(400).json({ error: 'معرّف غير صالح' });
+  await ensurePriceTable();
+  const data = await readProducts();
+  const r = await pgPool.query('SELECT item_key, price FROM user_prices WHERE user_id = $1', [id]);
+  const map = new Map(r.rows.map(x => [x.item_key, Number(x.price)]));
+  const tabLabel = {};
+  (data.tabsConfig || []).forEach(t => { tabLabel[t.id] = t.label; });
+  res.json(keyedItems(data).map(ki => ({
+    key: ki.key,
+    tabId: ki.tabId,
+    tabLabel: tabLabel[ki.tabId] || ki.tabId,
+    title: [...Object.values(ki.rest)].join(' ').trim() || '(بدون اسم)',
+    defaultPrice: parsePrice(ki.item.shekel),
+    customPrice: map.has(ki.key) ? map.get(ki.key) : null
+  })));
+});
+
+// price = رقم لتحديد سعر خاص، أو null لحذفه والعودة للسعر العام
+app.put('/api/admin/users/:id/prices', requireAdmin, requireDb, async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const { key, price } = req.body || {};
+  if (!Number.isInteger(id) || typeof key !== 'string') return res.status(400).json({ error: 'طلب غير صالح' });
+  await ensurePriceTable();
+  const data = await readProducts();
+  if (!keyedItems(data).some(ki => ki.key === key)) return res.status(404).json({ error: 'العنصر غير موجود' });
+  try {
+    if (price === null || price === '') {
+      await pgPool.query('DELETE FROM user_prices WHERE user_id = $1 AND item_key = $2', [id, key]);
+      return res.json({ key, customPrice: null });
+    }
+    const p = Math.round(Number(price) * 100) / 100;
+    if (!Number.isFinite(p) || p < 0 || p > 1000000) return res.status(400).json({ error: 'سعر غير صالح' });
+    await pgPool.query(
+      `INSERT INTO user_prices (user_id, item_key, price) VALUES ($1, $2, $3)
+       ON CONFLICT (user_id, item_key) DO UPDATE SET price = EXCLUDED.price`, [id, key, p]);
+    res.json({ key, customPrice: p });
+  } catch (e) {
+    if (e.code === '23503') return res.status(404).json({ error: 'المستخدم غير موجود' });
+    console.error(e);
+    res.status(500).json({ error: 'تعذّر حفظ السعر' });
+  }
+});
+
+// تعيين كلمة مرور جديدة لمستخدم (إن تُركت فارغة تُولَّد عشوائيًا وتُعرض للأدمن مرة واحدة)
+app.post('/api/admin/users/:id/password', requireAdmin, requireDb, async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  let password = String((req.body || {}).password || '');
+  if (!Number.isInteger(id)) return res.status(400).json({ error: 'معرّف غير صالح' });
+  if (!password) password = crypto.randomBytes(9).toString('base64').replace(/[+/=]/g, 'x').slice(0, 10);
+  if (password.length < 8 || password.length > 128) return res.status(400).json({ error: 'كلمة المرور يجب أن تكون 8 أحرف على الأقل' });
+  const r = await pgPool.query('UPDATE users SET password_hash = $1 WHERE id = $2 RETURNING id', [hashPassword(password), id]);
+  if (!r.rows[0]) return res.status(404).json({ error: 'المستخدم غير موجود' });
+  for (const [t, s] of userSessions.entries()) if (s.userId === id) userSessions.delete(t);
+  res.json({ password });
 });
 
 // تشغيل الخادم
