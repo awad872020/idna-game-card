@@ -1504,7 +1504,7 @@ function requireAdmin(req, res, next) {
 
 // Middleware
 app.use(cors({ origin: true, credentials: true }));
-app.use(express.json());
+app.use(express.json({ limit: '3mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ============================================================
@@ -1836,7 +1836,17 @@ app.put('/api/admin/tabs/:tabId', requireAdmin, async (req, res) => {
   }
 
   if (label) tab.label = label;
-  if (iconUrl) tab.icon = `<img src="${iconUrl}" alt="${label || tab.label}" style="width:133px;height:133px;object-fit:contain;" />`;
+  if (req.body && req.body.removeIcon === true) {
+    tab.icon = '';
+  } else if (iconUrl) {
+    // السماح فقط بروابط http(s) أو مسار محلي أو صورة data: بدون علامات اقتباس/أقواس
+    const okUrl = /^(https?:\/\/|\/|data:image\/(png|jpe?g|webp|gif|svg\+xml);base64,)[^"'<>\s]+$/i.test(iconUrl);
+    if (!okUrl || iconUrl.length > 2000000) {
+      return res.status(400).json({ error: 'رابط/صورة غير صالحة' });
+    }
+    const safeAlt = String(label || tab.label).replace(/[<>"']/g, '');
+    tab.icon = `<img src="${iconUrl}" alt="${safeAlt}" style="width:133px;height:133px;object-fit:contain;" />`;
+  }
 
   await saveProducts(data);
   res.json({ success: true });
