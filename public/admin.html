@@ -500,9 +500,31 @@ async function loadProducts() {
 function renderTabList() {
   const wrap = document.getElementById('tabList');
   const n = productsData.tabsConfig.length;
-  wrap.innerHTML = productsData.tabsConfig.map((t, i) => `
+  const groups = productsData.groups || [];
+  const gName = id => { const g = groups.find(x => x.id === id); return g ? g.label : ''; };
+  const groupsBox = `
+    <div style="border-bottom:1px solid #22223a;padding-bottom:12px;margin-bottom:12px;">
+      <div style="font-weight:700;color:#ffd700;margin-bottom:8px;">📁 الأقسام الرئيسية</div>
+      ${groups.length === 0 ? '<div style="color:#777;font-size:0.8rem;margin-bottom:8px;">لا توجد أقسام رئيسية بعد (مثال: ألعاب، تطبيقات دردشة، بطاقات)</div>' : ''}
+      ${groups.map((g, i) => `
+        <div class="tab-list-item" style="cursor:default;">
+          <span>${escapeHtml(g.label)} <small style="color:#777;">(${productsData.tabsConfig.filter(t => t.group === g.id).length})</small></span>
+          <span class="reorder-btns" style="flex-direction:row;">
+            <button class="btn small" onclick="moveGroup(${i}, -1)" ${i === 0 ? 'disabled' : ''}>⬆️</button>
+            <button class="btn small" onclick="moveGroup(${i}, 1)" ${i === groups.length - 1 ? 'disabled' : ''}>⬇️</button>
+            <button class="btn small" onclick="renameGroup('${g.id}')" title="تعديل الاسم">✏️</button>
+            <button class="btn small danger" onclick="deleteGroup('${g.id}')" title="حذف">🗑</button>
+          </span>
+        </div>`).join('')}
+      <div class="add-tab-form" style="margin-top:8px;padding-top:8px;">
+        <input type="text" id="newGroupLabel" placeholder="اسم قسم رئيسي جديد" />
+        <button class="btn small primary" onclick="addGroup()">➕ إضافة</button>
+      </div>
+    </div>
+    <div style="font-weight:700;color:#b0b0dd;margin-bottom:8px;">🗂 الأقسام (المنتجات)</div>`;
+  wrap.innerHTML = groupsBox + productsData.tabsConfig.map((t, i) => `
     <div class="tab-list-item ${t.id === activeTabId ? 'active' : ''}" onclick="selectTab('${t.id}')">
-      <span>${escapeHtml(stripEmoji(t.label))}</span>
+      <span>${escapeHtml(stripEmoji(t.label))}${t.group && gName(t.group) ? ` <small style="color:#7a7aa0;">· ${escapeHtml(gName(t.group))}</small>` : ''}</span>
       <span class="reorder-btns" style="flex-direction:row;" onclick="event.stopPropagation()">
         <button class="btn small" onclick="moveTab(${i}, -1)" title="نقل لأعلى" ${i === 0 ? 'disabled' : ''}>⬆️</button>
         <button class="btn small" onclick="moveTab(${i}, 1)" title="نقل لأسفل" ${i === n - 1 ? 'disabled' : ''}>⬇️</button>
@@ -519,6 +541,55 @@ function renderTabList() {
 }
 
 function stripEmoji(s) { return s; }
+
+async function addGroup() {
+  const label = document.getElementById('newGroupLabel').value.trim();
+  if (!label) { showToast('❌ اكتب اسم القسم الرئيسي'); return; }
+  try {
+    await api('/api/admin/groups', { method: 'POST', body: JSON.stringify({ label }) });
+    showToast('✅ تمت إضافة القسم الرئيسي');
+    await loadProducts();
+  } catch (e) { showToast('❌ ' + e.message); }
+}
+
+async function renameGroup(id) {
+  const g = (productsData.groups || []).find(x => x.id === id);
+  const label = prompt('الاسم الجديد:', g ? g.label : '');
+  if (label === null || !label.trim()) return;
+  try {
+    await api('/api/admin/groups/' + id, { method: 'PUT', body: JSON.stringify({ label: label.trim() }) });
+    await loadProducts();
+  } catch (e) { showToast('❌ ' + e.message); }
+}
+
+async function deleteGroup(id) {
+  if (!confirm('حذف هذا القسم الرئيسي؟ الأقسام التابعة له لن تُحذف وستصبح بدون قسم رئيسي.')) return;
+  try {
+    await api('/api/admin/groups/' + id, { method: 'DELETE' });
+    showToast('🗑 تم الحذف');
+    await loadProducts();
+  } catch (e) { showToast('❌ ' + e.message); }
+}
+
+async function moveGroup(idx, dir) {
+  const gs = productsData.groups;
+  const j = idx + dir;
+  if (j < 0 || j >= gs.length) return;
+  [gs[idx], gs[j]] = [gs[j], gs[idx]];
+  renderTabList();
+  try {
+    await api('/api/admin/groups-order', { method: 'PUT', body: JSON.stringify({ order: gs.map(g => g.id) }) });
+    showToast('✅ تم حفظ الترتيب');
+  } catch (e) { showToast('❌ ' + e.message); await loadProducts(); }
+}
+
+async function setTabGroup(tabId, group) {
+  try {
+    await api('/api/admin/tabs/' + tabId, { method: 'PUT', body: JSON.stringify({ group }) });
+    showToast('✅ تم نقل القسم');
+    await loadProducts();
+  } catch (e) { showToast('❌ ' + e.message); }
+}
 
 async function moveTab(idx, dir) {
   const tabs = productsData.tabsConfig;
@@ -562,6 +633,12 @@ function renderProductEditor(tabId) {
     <div class="tab-image-box" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:#16161f;border:1px solid #2a2a3a;border-radius:14px;padding:12px;margin-bottom:14px;">
       <div id="tabImgPreview" style="width:90px;height:90px;border-radius:12px;background:#0b0b0e;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:0.75rem;color:#777;text-align:center;">${tab.icon ? tab.icon.replace(/width:133px;height:133px;/, 'width:90px;height:90px;') : 'بدون صورة'}</div>
       <div style="flex:1;min-width:220px;display:flex;flex-direction:column;gap:8px;">
+        <label style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:0.85rem;color:#b0b0dd;">📁 القسم الرئيسي:
+          <select onchange="setTabGroup('${tabId}', this.value)" style="padding:7px 10px;border-radius:10px;border:1px solid #2a2a3a;background:#0b0b0e;color:#f0f0ff;">
+            <option value="">— بدون —</option>
+            ${(productsData.groups || []).map(g => `<option value="${g.id}" ${tab.group === g.id ? 'selected' : ''}>${escapeHtml(g.label)}</option>`).join('')}
+          </select>
+        </label>
         <strong>🖼 صورة القسم</strong>
         <input type="file" id="tabImgFile" accept="image/*" style="color:#b0b0dd;font-size:0.8rem;" onchange="uploadTabImage('${tabId}', this)" />
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
