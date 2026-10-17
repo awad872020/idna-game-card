@@ -146,6 +146,18 @@
 
     <!-- قسم المنتجات -->
     <section class="section" id="productsSection">
+      <div id="headerImageBox" style="background:#16161f;border:1px solid #2a2a3a;border-radius:14px;padding:12px;margin-bottom:16px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;">
+        <div id="headerImgPreview" style="width:220px;height:80px;border-radius:12px;background:#0b0b0e center/cover no-repeat;display:flex;align-items:center;justify-content:center;color:#777;font-size:0.8rem;">بدون صورة</div>
+        <div style="flex:1;min-width:240px;display:flex;flex-direction:column;gap:8px;">
+          <strong>🖼 صورة هيدر المتجر (الشريط العلوي)</strong>
+          <input type="file" id="headerImgFile" accept="image/*" style="color:#b0b0dd;font-size:0.8rem;" onchange="uploadHeaderImage(this)" />
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <input type="text" id="headerImgUrl" placeholder="أو الصق رابط صورة" style="flex:1;min-width:140px;padding:8px 10px;border-radius:10px;border:1px solid #2a2a3a;background:#0b0b0e;color:#f0f0ff;font-size:0.85rem;" />
+            <button class="btn small" onclick="saveHeaderImageUrl()">حفظ الرابط</button>
+            <button class="btn small danger" onclick="removeHeaderImage()">إزالة الصورة</button>
+          </div>
+        </div>
+      </div>
       <div class="products-layout">
         <div class="tab-list" id="tabList"></div>
         <div class="product-editor" id="productEditor">
@@ -489,6 +501,7 @@ async function loadProducts() {
   try {
     productsData = await api('/api/admin/products');
     renderTabList();
+    renderHeaderPreview();
     if (activeTabId && productsData.products[activeTabId]) {
       renderProductEditor(activeTabId);
     }
@@ -547,6 +560,60 @@ function renderTabList() {
 }
 
 function stripEmoji(s) { return s; }
+
+function renderHeaderPreview() {
+  const el = document.getElementById('headerImgPreview');
+  if (!el) return;
+  const img = productsData.settings && productsData.settings.headerImage;
+  if (img) { el.style.backgroundImage = 'url("' + img.replace(/"/g, '%22') + '")'; el.textContent = ''; }
+  else { el.style.backgroundImage = 'none'; el.textContent = 'بدون صورة'; }
+}
+
+function resizeBannerToDataUrl(file, maxW) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const r = Math.min(1, maxW / img.width);
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * r); c.height = Math.round(img.height * r);
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#14141f'; ctx.fillRect(0, 0, c.width, c.height);
+      ctx.drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      resolve(c.toDataURL('image/jpeg', 0.85));
+    };
+    img.onerror = () => reject(new Error('تعذّر قراءة الصورة'));
+    img.src = url;
+  });
+}
+
+async function setHeaderImage(payload) {
+  try {
+    await api('/api/admin/settings/header', { method: 'PUT', body: JSON.stringify(payload) });
+    showToast('✅ تم تحديث صورة الهيدر');
+    await loadProducts();
+  } catch (e) { showToast('❌ ' + e.message); }
+}
+
+async function uploadHeaderImage(input) {
+  const f = input.files && input.files[0];
+  if (!f) return;
+  try { await setHeaderImage({ imageUrl: await resizeBannerToDataUrl(f, 1400) }); }
+  catch (e) { showToast('❌ ' + e.message); }
+  input.value = '';
+}
+
+async function saveHeaderImageUrl() {
+  const url = document.getElementById('headerImgUrl').value.trim();
+  if (!url) { showToast('❌ الصق رابط الصورة'); return; }
+  await setHeaderImage({ imageUrl: url });
+}
+
+async function removeHeaderImage() {
+  if (!confirm('إزالة صورة الهيدر؟')) return;
+  await setHeaderImage({ removeImage: true });
+}
 
 async function addGroup() {
   const label = document.getElementById('newGroupLabel').value.trim();
