@@ -539,6 +539,18 @@ function renderProductEditor(tabId) {
 
   editor.innerHTML = `
     <h3>${tab.label} — تعديل الأسعار</h3>
+    <div class="tab-image-box" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:#16161f;border:1px solid #2a2a3a;border-radius:14px;padding:12px;margin-bottom:14px;">
+      <div id="tabImgPreview" style="width:90px;height:90px;border-radius:12px;background:#0b0b0e;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:0.75rem;color:#777;text-align:center;">${tab.icon ? tab.icon.replace(/width:133px;height:133px;/, 'width:90px;height:90px;') : 'بدون صورة'}</div>
+      <div style="flex:1;min-width:220px;display:flex;flex-direction:column;gap:8px;">
+        <strong>🖼 صورة القسم</strong>
+        <input type="file" id="tabImgFile" accept="image/*" style="color:#b0b0dd;font-size:0.8rem;" onchange="uploadTabImage('${tabId}', this)" />
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <input type="text" id="tabImgUrl" placeholder="أو الصق رابط صورة" style="flex:1;min-width:140px;padding:8px 10px;border-radius:10px;border:1px solid #2a2a3a;background:#0b0b0e;color:#f0f0ff;font-size:0.85rem;" />
+          <button class="btn small" onclick="saveTabImageUrl('${tabId}')">حفظ الرابط</button>
+          <button class="btn small danger" onclick="removeTabImage('${tabId}')">إزالة الصورة</button>
+        </div>
+      </div>
+    </div>
     <div id="itemsWrap"></div>
     <div style="display:flex; gap:10px; margin-top:14px; flex-wrap:wrap;">
       <button class="btn small primary" onclick="addItem('${tabId}')">➕ إضافة عنصر</button>
@@ -689,6 +701,56 @@ async function addTab() {
   } catch (e) {
     showToast('❌ ' + e.message);
   }
+}
+
+function resizeImageToDataUrl(file, max) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const r = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * r); c.height = Math.round(img.height * r);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      resolve(c.toDataURL('image/png'));
+    };
+    img.onerror = () => reject(new Error('تعذّر قراءة الصورة'));
+    img.src = url;
+  });
+}
+
+async function setTabImage(tabId, iconUrl) {
+  try {
+    await api(`/api/admin/tabs/${tabId}`, { method: 'PUT', body: JSON.stringify({ iconUrl }) });
+    showToast('✅ تم تحديث صورة القسم');
+    await loadProducts();
+  } catch (e) { showToast('❌ ' + e.message); }
+}
+
+async function uploadTabImage(tabId, input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { showToast('❌ اختر ملف صورة'); return; }
+  try {
+    const dataUrl = await resizeImageToDataUrl(file, 400);
+    await setTabImage(tabId, dataUrl);
+  } catch (e) { showToast('❌ ' + e.message); }
+}
+
+async function saveTabImageUrl(tabId) {
+  const url = document.getElementById('tabImgUrl').value.trim();
+  if (!url) { showToast('❌ الصق رابط الصورة'); return; }
+  await setTabImage(tabId, url);
+}
+
+async function removeTabImage(tabId) {
+  if (!confirm('إزالة صورة هذا القسم؟')) return;
+  try {
+    await api(`/api/admin/tabs/${tabId}`, { method: 'PUT', body: JSON.stringify({ removeIcon: true }) });
+    showToast('🗑 تمت إزالة الصورة');
+    await loadProducts();
+  } catch (e) { showToast('❌ ' + e.message); }
 }
 
 async function editTabInfo(tabId) {
