@@ -499,9 +499,14 @@ async function loadProducts() {
 
 function renderTabList() {
   const wrap = document.getElementById('tabList');
-  wrap.innerHTML = productsData.tabsConfig.map(t => `
+  const n = productsData.tabsConfig.length;
+  wrap.innerHTML = productsData.tabsConfig.map((t, i) => `
     <div class="tab-list-item ${t.id === activeTabId ? 'active' : ''}" onclick="selectTab('${t.id}')">
       <span>${escapeHtml(stripEmoji(t.label))}</span>
+      <span class="reorder-btns" style="flex-direction:row;" onclick="event.stopPropagation()">
+        <button class="btn small" onclick="moveTab(${i}, -1)" title="نقل لأعلى" ${i === 0 ? 'disabled' : ''}>⬆️</button>
+        <button class="btn small" onclick="moveTab(${i}, 1)" title="نقل لأسفل" ${i === n - 1 ? 'disabled' : ''}>⬇️</button>
+      </span>
     </div>
   `).join('') + `
     <div class="add-tab-form">
@@ -514,6 +519,21 @@ function renderTabList() {
 }
 
 function stripEmoji(s) { return s; }
+
+async function moveTab(idx, dir) {
+  const tabs = productsData.tabsConfig;
+  const j = idx + dir;
+  if (j < 0 || j >= tabs.length) return;
+  [tabs[idx], tabs[j]] = [tabs[j], tabs[idx]];
+  renderTabList();
+  try {
+    await api('/api/admin/tabs-order', { method: 'PUT', body: JSON.stringify({ order: tabs.map(t => t.id) }) });
+    showToast('✅ تم حفظ ترتيب الأقسام');
+  } catch (e) {
+    showToast('❌ ' + e.message);
+    await loadProducts();
+  }
+}
 
 function selectTab(id) {
   activeTabId = id;
