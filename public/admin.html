@@ -508,8 +508,14 @@ function renderTabList() {
       ${groups.length === 0 ? '<div style="color:#777;font-size:0.8rem;margin-bottom:8px;">لا توجد أقسام رئيسية بعد (مثال: ألعاب، تطبيقات دردشة، بطاقات)</div>' : ''}
       ${groups.map((g, i) => `
         <div class="tab-list-item" style="cursor:default;">
-          <span>${escapeHtml(g.label)} <small style="color:#777;">(${productsData.tabsConfig.filter(t => t.group === g.id).length})</small></span>
+          <span style="display:flex;align-items:center;gap:8px;">
+            ${g.icon ? `<img src="${escapeHtml(g.icon)}" style="width:34px;height:34px;object-fit:contain;border-radius:8px;background:#0b0b0e;" />` : ''}
+            ${escapeHtml(g.label)} <small style="color:#777;">(${productsData.tabsConfig.filter(t => t.group === g.id).length})</small>
+          </span>
           <span class="reorder-btns" style="flex-direction:row;">
+            <button class="btn small" onclick="pickGroupImage('${g.id}')" title="رفع صورة">🖼</button>
+            <button class="btn small" onclick="groupImageUrl('${g.id}')" title="رابط صورة">🔗</button>
+            ${g.icon ? `<button class="btn small danger" onclick="removeGroupImage('${g.id}')" title="إزالة الصورة">❌</button>` : ''}
             <button class="btn small" onclick="moveGroup(${i}, -1)" ${i === 0 ? 'disabled' : ''}>⬆️</button>
             <button class="btn small" onclick="moveGroup(${i}, 1)" ${i === groups.length - 1 ? 'disabled' : ''}>⬇️</button>
             <button class="btn small" onclick="renameGroup('${g.id}')" title="تعديل الاسم">✏️</button>
@@ -548,6 +554,40 @@ async function addGroup() {
   try {
     await api('/api/admin/groups', { method: 'POST', body: JSON.stringify({ label }) });
     showToast('✅ تمت إضافة القسم الرئيسي');
+    await loadProducts();
+  } catch (e) { showToast('❌ ' + e.message); }
+}
+
+function pickGroupImage(id) {
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = 'image/*';
+  inp.onchange = async () => {
+    const f = inp.files && inp.files[0];
+    if (!f) return;
+    try {
+      const dataUrl = await resizeImageToDataUrl(f, 300);
+      await api('/api/admin/groups/' + id, { method: 'PUT', body: JSON.stringify({ iconUrl: dataUrl }) });
+      showToast('✅ تم تحديث صورة القسم الرئيسي');
+      await loadProducts();
+    } catch (e) { showToast('❌ ' + e.message); }
+  };
+  inp.click();
+}
+
+async function groupImageUrl(id) {
+  const url = prompt('الصق رابط الصورة:', '');
+  if (!url || !url.trim()) return;
+  try {
+    await api('/api/admin/groups/' + id, { method: 'PUT', body: JSON.stringify({ iconUrl: url.trim() }) });
+    showToast('✅ تم تحديث الصورة');
+    await loadProducts();
+  } catch (e) { showToast('❌ ' + e.message); }
+}
+
+async function removeGroupImage(id) {
+  try {
+    await api('/api/admin/groups/' + id, { method: 'PUT', body: JSON.stringify({ removeIcon: true }) });
+    showToast('🗑 تمت إزالة الصورة');
     await loadProducts();
   } catch (e) { showToast('❌ ' + e.message); }
 }
