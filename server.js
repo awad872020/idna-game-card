@@ -1615,6 +1615,7 @@ const ACCELERATORS = [
 async function readProducts() {
   const data = await readProductsRaw();
   if (!Array.isArray(data.groups)) data.groups = []; // الأقسام الرئيسية (مجموعات)
+  if (!data.settings || typeof data.settings !== 'object') data.settings = {};
   try {
     data.migrations = data.migrations || {};
     if (!data.migrations.jawakerAccelerators && data.products && Array.isArray(data.tabsConfig) && data.tabsConfig.some(t => t.id === 'jawaker')) {
@@ -1823,6 +1824,24 @@ app.post('/api/admin/tabs', requireAdmin, async (req, res) => {
   data.products[id] = [];
   await saveProducts(data);
   res.status(201).json({ success: true });
+});
+
+// صورة هيدر المتجر (store-header)
+app.put('/api/admin/settings/header', requireAdmin, async (req, res) => {
+  const body = req.body || {};
+  const data = await readProducts();
+  if (body.removeImage === true) {
+    delete data.settings.headerImage;
+  } else if (body.imageUrl) {
+    const url = String(body.imageUrl);
+    const ok = /^(https?:\/\/|\/|data:image\/(png|jpe?g|webp|gif);base64,)[^"'<>\s()]+$/i.test(url);
+    if (!ok || url.length > 2500000) return res.status(400).json({ error: 'رابط/صورة غير صالحة' });
+    data.settings.headerImage = url;
+  } else {
+    return res.status(400).json({ error: 'لا توجد صورة' });
+  }
+  await saveProducts(data);
+  res.json({ success: true });
 });
 
 // ===== الأقسام الرئيسية (مجموعات): ألعاب، تطبيقات الدردشة، بطاقات... =====
