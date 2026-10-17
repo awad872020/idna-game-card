@@ -786,6 +786,7 @@ setInterval(() => { if (currentUser) refreshUser(); }, 60000);
       if (Array.isArray(data.tabsConfig) && data.tabsConfig.length > 0) {
         tabsConfig = data.tabsConfig;
         groups = Array.isArray(data.groups) ? data.groups : [];
+        applyHeaderImage(data.settings);
         products = data.products || {};
         return;
       }
@@ -800,6 +801,15 @@ setInterval(() => { if (currentUser) refreshUser(); }, 60000);
   // إصلاح الصور: منع إرسال الـ Referer (حماية hotlink) + بديل نصي إذا فشل التحميل
   function safeIcon(html, fallback) {
     return String(html || '').replace(/<img\s/i, '<img referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null;this.outerHTML=\'<span style=&quot;font-size:2.5rem&quot;>' + (fallback || '🎮') + '</span>\'" ');
+  }
+
+  function applyHeaderImage(settings) {
+    const img = settings && settings.headerImage;
+    if (!img || !/^(https?:\/\/|\/|data:image\/)/i.test(img)) return;
+    const hd = document.querySelector('.store-header');
+    hd.style.backgroundImage = 'linear-gradient(rgba(10,10,18,0.55), rgba(10,10,18,0.55)), url("' + img.replace(/"/g, '%22') + '")';
+    hd.style.backgroundSize = 'cover';
+    hd.style.backgroundPosition = 'center';
   }
 
   function renderStore() {
