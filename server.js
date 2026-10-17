@@ -1850,12 +1850,20 @@ app.put('/api/admin/groups-order', requireAdmin, async (req, res) => {
 });
 
 app.put('/api/admin/groups/:id', requireAdmin, async (req, res) => {
-  const label = String((req.body && req.body.label) || '').trim().slice(0, 60);
-  if (!label) return res.status(400).json({ error: 'اسم القسم الرئيسي مطلوب' });
+  const body = req.body || {};
+  const label = String(body.label || '').trim().slice(0, 60);
   const data = await readProducts();
   const g = data.groups.find(x => x.id === req.params.id);
   if (!g) return res.status(404).json({ error: 'القسم الرئيسي غير موجود' });
-  g.label = label;
+  if (label) g.label = label;
+  if (body.removeIcon === true) {
+    delete g.icon;
+  } else if (body.iconUrl) {
+    const url = String(body.iconUrl);
+    const okUrl = /^(https?:\/\/|\/|data:image\/(png|jpe?g|webp|gif|svg\+xml);base64,)[^"'<>\s]+$/i.test(url);
+    if (!okUrl || url.length > 2000000) return res.status(400).json({ error: 'رابط/صورة غير صالحة' });
+    g.icon = url;
+  }
   await saveProducts(data);
   res.json({ success: true });
 });
