@@ -19,6 +19,9 @@
     .store-header .badges { margin-top: 12px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
     .store-header .badges span { background: #1a1a2e; padding: 4px 16px; border-radius: 40px; color: #ffd700; border: 1px solid #ffd700; font-size: 0.8rem; font-weight: 600; }
     .tabs { display: flex; justify-content: center; gap: 12px; margin-bottom: 32px; flex-wrap: wrap; }
+    .group-btn { padding: 12px 28px; border: 2px solid #2a2a3a; border-radius: 14px; background: #12121a; color: #b0b0dd; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: 0.3s; user-select: none; }
+    .group-btn:hover { border-color: #4a7aff; color: #f0f0ff; }
+    .group-btn.active { border-color: #ffd700; color: #ffd700; background: #1a1a2e; }
     .tab-btn { padding: 14px 30px; border: 2px solid #2a2a3a; border-radius: 60px; background: #16161f; color: #9a9aba; font-size: 1rem; font-weight: 600; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 8px; user-select: none; }
     .tab-btn:hover { border-color: #4a7aff; color: #f0f0ff; }
     .tab-btn.active { border-color: #ffd700; background: #1a1a2e; color: #ffd700; box-shadow: 0 0 30px rgba(255,215,0,0.1); }
@@ -117,6 +120,7 @@
   </div>
 </div>
 
+<div class="tabs" id="groupContainer"></div>
 <div class="tabs" id="tabContainer"></div>
 <button id="backBtn" onclick="goBack()">⬅ الرجوع إلى الأقسام الأساسية</button>
 <div id="contentContainer"></div>
@@ -268,6 +272,7 @@ setInterval(() => { if (currentUser) refreshUser(); }, 60000);
   // =============================================
 
   let tabsConfig = [];
+  let groups = [];
   let products = {};
 
   // نسخة احتياطية قديمة (تُستخدم فقط إذا فشل الاتصال بالخادم)
@@ -780,6 +785,7 @@ setInterval(() => { if (currentUser) refreshUser(); }, 60000);
       const data = await res.json();
       if (Array.isArray(data.tabsConfig) && data.tabsConfig.length > 0) {
         tabsConfig = data.tabsConfig;
+        groups = Array.isArray(data.groups) ? data.groups : [];
         products = data.products || {};
         return;
       }
@@ -808,6 +814,37 @@ setInterval(() => { if (currentUser) refreshUser(); }, 60000);
     `;
     tabContainer.appendChild(btn);
   });
+
+  // الأقسام الرئيسية (ألعاب، تطبيقات...): تصفية التبويبات حسب المجموعة
+  const groupContainer = document.getElementById('groupContainer');
+  const hasGroups = groups.length > 0 && tabsConfig.some(t => t.group && groups.some(g => g.id === t.group));
+  if (hasGroups) {
+    const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const entries = [{ id: '__all', label: 'الكل' }, ...groups.filter(g => tabsConfig.some(t => t.group === g.id))];
+    if (tabsConfig.some(t => !t.group || !groups.some(g => g.id === t.group))) entries.push({ id: '__other', label: 'أخرى' });
+    entries.forEach((g, i) => {
+      const b = document.createElement('button');
+      b.className = 'group-btn' + (i === 0 ? ' active' : '');
+      b.dataset.group = g.id;
+      b.innerHTML = esc(g.label);
+      b.addEventListener('click', () => {
+        document.querySelectorAll('.group-btn').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        tabContainer.querySelectorAll('.tab-btn').forEach(tb => {
+          const tab = tabsConfig.find(t => t.id === tb.dataset.tab);
+          const known = tab.group && groups.some(x => x.id === tab.group);
+          const show = g.id === '__all' || (g.id === '__other' ? !known : tab.group === g.id);
+          tb.style.display = show ? '' : 'none';
+          tb.classList.remove('active');
+        });
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        backBtn.style.display = 'none';
+      });
+      groupContainer.appendChild(b);
+    });
+  } else {
+    groupContainer.style.display = 'none';
+  }
 
   // إنشاء محتوى التبويبات
   tabsConfig.forEach(tab => {
