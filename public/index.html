@@ -826,7 +826,8 @@ setInterval(() => { if (currentUser) refreshUser(); }, 60000);
       const b = document.createElement('button');
       b.className = 'group-btn' + (i === 0 ? ' active' : '');
       b.dataset.group = g.id;
-      b.innerHTML = esc(g.label);
+      b.style.cssText = 'display:flex;align-items:center;gap:10px;';
+      b.innerHTML = (g.icon ? '<img referrerpolicy="no-referrer" src="' + esc(g.icon) + '" alt="" style="width:48px;height:48px;object-fit:contain;border-radius:10px;" onerror="this.remove()" />' : '') + '<span>' + esc(g.label) + '</span>';
       b.addEventListener('click', () => {
         document.querySelectorAll('.group-btn').forEach(x => x.classList.remove('active'));
         b.classList.add('active');
