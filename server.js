@@ -1614,6 +1614,7 @@ const ACCELERATORS = [
 
 async function readProducts() {
   const data = await readProductsRaw();
+  if (!Array.isArray(data.groups)) data.groups = []; // الأقسام الرئيسية (مجموعات)
   try {
     data.migrations = data.migrations || {};
     if (!data.migrations.jawakerAccelerators && data.products && Array.isArray(data.tabsConfig) && data.tabsConfig.some(t => t.id === 'jawaker')) {
@@ -1824,6 +1825,52 @@ app.post('/api/admin/tabs', requireAdmin, async (req, res) => {
   res.status(201).json({ success: true });
 });
 
+// ===== الأقسام الرئيسية (مجموعات): ألعاب، تطبيقات الدردشة، بطاقات... =====
+app.post('/api/admin/groups', requireAdmin, async (req, res) => {
+  const label = String((req.body && req.body.label) || '').trim().slice(0, 60);
+  if (!label) return res.status(400).json({ error: 'اسم القسم الرئيسي مطلوب' });
+  const data = await readProducts();
+  const id = 'g' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+  data.groups.push({ id, label });
+  await saveProducts(data);
+  res.status(201).json({ success: true, id });
+});
+
+app.put('/api/admin/groups-order', requireAdmin, async (req, res) => {
+  const { order } = req.body || {};
+  if (!Array.isArray(order)) return res.status(400).json({ error: 'order يجب أن تكون مصفوفة' });
+  const data = await readProducts();
+  const byId = new Map(data.groups.map(g => [g.id, g]));
+  const sorted = [];
+  order.forEach(id => { if (byId.has(id)) { sorted.push(byId.get(id)); byId.delete(id); } });
+  byId.forEach(g => sorted.push(g));
+  data.groups = sorted;
+  await saveProducts(data);
+  res.json({ success: true });
+});
+
+app.put('/api/admin/groups/:id', requireAdmin, async (req, res) => {
+  const label = String((req.body && req.body.label) || '').trim().slice(0, 60);
+  if (!label) return res.status(400).json({ error: 'اسم القسم الرئيسي مطلوب' });
+  const data = await readProducts();
+  const g = data.groups.find(x => x.id === req.params.id);
+  if (!g) return res.status(404).json({ error: 'القسم الرئيسي غير موجود' });
+  g.label = label;
+  await saveProducts(data);
+  res.json({ success: true });
+});
+
+app.delete('/api/admin/groups/:id', requireAdmin, async (req, res) => {
+  const data = await readProducts();
+  const idx = data.groups.findIndex(x => x.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: 'القسم الرئيسي غير موجود' });
+  data.groups.splice(idx, 1);
+  // الأقسام التابعة له تصبح بدون مجموعة (لا تُحذف)
+  data.tabsConfig.forEach(t => { if (t.group === req.params.id) delete t.group; });
+  await saveProducts(data);
+  res.json({ success: true });
+});
+
 // إعادة ترتيب الأقسام: يستقبل { order: [tabId, ...] }
 app.put('/api/admin/tabs-order', requireAdmin, async (req, res) => {
   const { order } = req.body || {};
@@ -1852,6 +1899,13 @@ app.put('/api/admin/tabs/:tabId', requireAdmin, async (req, res) => {
   }
 
   if (label) tab.label = label;
+  if (req.body && typeof req.body.group === 'string') {
+    const g = req.body.group;
+    if (g && !(data.groups || []).some(x => x.id === g)) {
+      return res.status(400).json({ error: 'القسم الرئيسي غير موجود' });
+    }
+    if (g) tab.group = g; else delete tab.group;
+  }
   if (req.body && req.body.removeIcon === true) {
     tab.icon = '';
   } else if (iconUrl) {
