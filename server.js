@@ -1824,6 +1824,22 @@ app.post('/api/admin/tabs', requireAdmin, async (req, res) => {
   res.status(201).json({ success: true });
 });
 
+// إعادة ترتيب الأقسام: يستقبل { order: [tabId, ...] }
+app.put('/api/admin/tabs-order', requireAdmin, async (req, res) => {
+  const { order } = req.body || {};
+  if (!Array.isArray(order)) {
+    return res.status(400).json({ error: 'order يجب أن تكون مصفوفة' });
+  }
+  const data = await readProducts();
+  const byId = new Map(data.tabsConfig.map(t => [t.id, t]));
+  const sorted = [];
+  order.forEach(id => { if (byId.has(id)) { sorted.push(byId.get(id)); byId.delete(id); } });
+  byId.forEach(t => sorted.push(t)); // أي قسم غير مذكور يبقى في النهاية
+  data.tabsConfig = sorted;
+  await saveProducts(data);
+  res.json({ success: true });
+});
+
 // تعديل عنوان/أيقونة قسم موجود
 app.put('/api/admin/tabs/:tabId', requireAdmin, async (req, res) => {
   const { tabId } = req.params;
