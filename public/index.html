@@ -791,6 +791,11 @@ setInterval(() => { if (currentUser) refreshUser(); }, 60000);
     }
   }
 
+  // إصلاح الصور: منع إرسال الـ Referer (حماية hotlink) + بديل نصي إذا فشل التحميل
+  function safeIcon(html, fallback) {
+    return String(html || '').replace(/<img\s/i, '<img referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null;this.outerHTML=\'<span style=&quot;font-size:2.5rem&quot;>' + (fallback || '🎮') + '</span>\'" ');
+  }
+
   function renderStore() {
   // إنشاء التبويبات
   tabsConfig.forEach((tab, index) => {
@@ -798,7 +803,7 @@ setInterval(() => { if (currentUser) refreshUser(); }, 60000);
     btn.className = `tab-btn ${index === 0 ? 'active' : ''}`;
     btn.dataset.tab = tab.id;
     btn.innerHTML = `
-      <span class="tab-icon">${tab.icon}</span>
+      <span class="tab-icon">${safeIcon(tab.icon, (tab.label || '').split(' ')[0])}</span>
       ${tab.label}
     `;
     tabContainer.appendChild(btn);
@@ -856,7 +861,7 @@ setInterval(() => { if (currentUser) refreshUser(); }, 60000);
       `;
 
       card.innerHTML = `
-        <div class="icon">${p.image ? `<img src="${p.image}" alt="${p.name || ''}" style="width:133px;height:133px;object-fit:contain;" />` : tab.icon}</div>
+        <div class="icon">${p.image ? `<img referrerpolicy="no-referrer" src="${p.image}" alt="${p.name || ''}" style="width:133px;height:133px;object-fit:contain;" />` : safeIcon(tab.icon, (tab.label || '').split(' ')[0])}</div>
         ${detailHtml}
       `;
       card.appendChild(orderBtn);
